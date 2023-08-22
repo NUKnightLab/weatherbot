@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Nombre del Evento</title>
+</head>
+<body>
+    <p>El Centro Nacional de Huracanes (CNH) emitió un {{event.type}} para Puerto Rico
+    ante el inminente paso de {{ data.stormname }} cerca o sobre la isla.</p>
+
+  <p>El sistema se encuentra a {% for distance in data.distances %}{% if loop.first %}{{ distance }}{% elif loop.last %} y {{ distance }}{% else %}, {{ distance }}{% endif %}{% endfor %}, con vientos máximos sostenidos de {{ data.winds }}</p>
+  
+  <p>De acuerdo con el boletín más reciente del CNH emitido a las {{ data.published }}, el fenómeno atmosférico se desplaza hacia el {{ data.movement }}</p>
+  
+
+  {% if data.events %}
+    <p>Advertencias y observaciones en efecto:</p>
+    <ul>
+      {% for event in data.events %}
+        <li>
+          {{ event.type }} para: {% for place in event.places %}
+           * {{ place }}
+          {% endfor %}
+        </li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+
+</body>
+</html>

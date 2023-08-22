@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Nombre del Evento</title>
+</head>
+<body>
+ <p>{{data.event}} está evolucionando en el Atlántico. No hay alertas o avisos costeros para Puerto Rico. </p>
+  <p>El sistema se encuentra a {% for distance in data.distances %} {% if loop.first %}{{ distance }}{% elif loop.last %}y {{ distance }}{% else %}, {{ distance }}{% endif %}{% endfor %}, con vientos máximos sostenidos de {{ data.winds }}.</p>
+  <p>De acuerdo con el boletín más reciente del CNH emitido a las {{ data.published }}, el fenómeno atmosférico se desplaza hacia el {{ data.movement }}.</p>
+  
+  {% if flags.interest %}
+    <p>NHC ha identificado las siguientes áreas de interés: {{ data.interests }}</p>
+  {% endif %}
+
+  {% if data.events %}
+    <p>Advertencias y observaciones en efecto:
+    <ul>
+      {% for event in data.events %}
+        <li>
+          {{ event.type }} para {% for place in event.places %}
+          {% if loop.first %}
+            {{ place }}
+          {% else %}
+            , {{ place }}
+          {% endif %}
+          {% endfor %}.
+        </li>
+      {% endfor %}
+    </ul>
+  </p>
+  {% endif %}
+  
+  {% if flags.rain or flags.surge or flags.surf or flags.tornadoes %}
+    <p>Posibles peligros incluyen:
+    <ul>
+      {% if flags.rain %}
+        <li>
+          {% if flags.rainfacts %}
+            {{ data.rain }}
+          {% else %}
+            Precipitaciones entre
+            {% for rain_data in data.rain %}
+              {% if loop.first %}
+                {{ rain_data.height }}{% if rain_data.location %} en {{ rain_data.location }}{% endif %}
+              {% elif loop.last %}
+                y {{ rain_data.height }}{% if rain_data.location %} en {{ rain_data.location }}{% endif %}.
+              {% else %}
+                , {{ rain_data.height }}{% if rain_data.location %} en {{ rain_data.location }}{% endif %}
+              {% endif %}
+            {% endfor %}.
+          {% endif %}
+        </li>
+      {% endif %}
+      
+      {% if flags.surge %}
+        <li>
+          {% if flags.surgefacts %}
+            {{ data.surge }}
+          {% else %}
+            Marejada ciclónica que puede alcanzar entre
+            {% for surge_data in data.surge %}
+              {% if loop.first %}
+                {{ surge_data.height }}{% if surge_data.location %} en {{ surge_data.location }}{% endif %}
+              {% elif loop.last %}
+                y {{ surge_data.height }}{% if surge_data.location %} en {{ surge_data.location }}{% endif %}.
+              {% else %}
+                , {{ surge_data.height }}{% if surge_data.location %} en {{ surge_data.location }}{% endif %}
+              {% endif %}
+            {% endfor %}.
+          {% endif %}
+        </li>
+      {% endif %}
+      
+      {% if flags.surf %}
+        <li>{{ data.surf }}</li>
+      {% endif %}
+      
+      {% if flags.tornadoes %}
+        <li>{{ data.tornadoes }}</li>
+      {% endif %}
+    </ul>
+  </p>
+  {% endif %}
+</body>
+</html>

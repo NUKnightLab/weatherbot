@@ -1,0 +1,49 @@
+
+    <p>{{ data.headline }}</p>
+    <p>El Centro Nacional de Huracanes (CNH) emitió un aviso de huracán para Puerto Rico
+         ante el inminente paso de {{ data.stormname }} cerca o sobre la isla.
+         {% if data.distances %}
+            El ciclón se encuentra a una distancia de {% for distance in data.distances %}
+            {% if loop.first %}{{ distance }}{% elif loop.last %}y {{ distance }}{% else %}, {{ distance }}{% endif %}{% endfor %},
+            {% endif %}{% if data.winds %}con vientos máximos sostenidos de {{ data.winds }}.
+            {% endif %}
+        De acuerdo con el boletín más reciente emitido por el CNH a las {{ data.published }},
+        el fenómeno atmosférico se desplaza hacia el {{ data.movement }}.
+    </p>
+    
+    {% if flags.rain %}
+    <p>
+        {% if flags.rainfacts %}
+            {{ data.rain }}
+        {% else %}
+        Se pronostica que el huracán {{ data.stormname }} dejará a su paso precipitaciones entre 
+            {% for rain_data in data.rain %}
+                {% if loop.first %}
+                    {{ rain_data.height }}{% if rain_data.location %} en {{ rain_data.location }}{% endif %}
+                {% elif loop.last %}
+                    y {{ rain_data.height }}{% if rain_data.location %} en {{ rain_data.location }}{% endif %}.
+                {% else %}
+                    , {{ rain_data.height }}{% if rain_data.location %} en {{ rain_data.location }}{% endif %}
+                {% endif %}
+            {% endfor %}.
+        {% endif %}
+    </p>
+    {% endif %}
+    {% if flags.surge %}
+    <p>
+      {% if flags.surgefacts %}
+        {{ data.surge }}
+      {% else %}
+        Existe la posibilidad de marejada ciclónica que podría alcanzar niveles entre 
+        {% for surge_data in data.surge %}{% if loop.first %}{{ surge_data.height }}{% if surge_data.location %} en {{ surge_data.location }}{% endif %}{% endif %}{% if loop.last and not loop.first %} y {{ surge_data.height }}{% if surge_data.location %} en {{ surge_data.location }}{% endif %}.{% endif %}
+        {% if not loop.first and not loop.last %}, {{ surge_data.height }}{% if surge_data.location %} en {{ surge_data.location }}{% endif %}{% endif %}
+        {% endfor %}
+      {% endif %}
+    </p>
+  {% endif %}
+    {% if flags.surf %}
+    <p>En cuanto a las condiciones del mar, {{ data.surf }}</p>
+    {% endif %}
+    {% if flags.tornadoes %}
+    <p>Además, {{ data.tornadoes }}.</p>
+    {% endif %}
