@@ -101,7 +101,7 @@ def main_nhc():
             
             with open(filelocation, "w") as file:
                 file.write(response.text) 
-            parsed = writeNHC('test.xml')
+            parsed = writeNHC('test.xml') # TODO pass test file from command line instead of editing code
             if parsed== {}:
                 return
             print (parsed)

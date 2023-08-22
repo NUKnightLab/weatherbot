@@ -14,7 +14,7 @@ def clean_str (str) :
     return str
 def get_tropical_bulletin (bulletin) :
     parsed_ids = load_parsed_data('NHCdata.json')
-    print(parsed_ids)
+    logger.debug(parsed_ids)
     data = {}
     separatorpattern = r"\.\s+"
     area = ["puerto rico", "vieques","culebra"]  
@@ -24,16 +24,14 @@ def get_tropical_bulletin (bulletin) :
         
         soup = BeautifulSoup(f , features="xml")
 
-
-        # print(soup)
         items = soup.find_all('item')
         stormname = soup.find('title').text.strip()
         if stormname in parsed_ids:
-            print(f"ID '{stormname}' has already been processed. Skipping...")
+            logger.debug(f"ID '{stormname}' has already been processed. Skipping...")
             signals["skip"] = True
             return data , hazardflags , signals , parsed_ids
         else:
-            print(f"Processing ID '{stormname}'...")
+            logger.debug(f"Processing ID '{stormname}'...")
             parsed_ids[stormname] = True
         name_pattern= r'\b([A-Za-z]+) (?:Intermediate|Advisory)'
         name_match = re.search(name_pattern, stormname)
@@ -63,7 +61,6 @@ def get_tropical_bulletin (bulletin) :
             location_pattern = r"LOCATION\.\.\.(.*)"
             location_match = re.search(location_pattern, summary)
             assert len(location_match.groups()) == 1
-            #print(location_match.group(1)  )
             data["location"] = location_match.group(1)
             #Reference to the nearest known land location
             nearest_pattern = r"ABOUT\s+(\d+)\s+(MI|KM)\.{3}(\d+)\s+(MI|KM)(?:\s+(\w)\s*)?[\s\S]*?OF\s+(\w.*)"
@@ -96,8 +93,6 @@ def get_tropical_bulletin (bulletin) :
             pressure_match = re.findall(pressure_pattern, summary)
             assert len(pressure_match) == 1
             data["pressure"] = pressure_match[0].split("...")[0]
-            # print(data["pressure"])
-            
        
         # alerts and warnings
             
@@ -149,7 +144,6 @@ def get_tropical_bulletin (bulletin) :
                         
                     index += 1
                 data["events"].append(event)
-            #print(events)
             data["practive"] = []
             for event in data["events"]:
                 if event["relevant"] == True :
@@ -266,78 +260,83 @@ def get_tropical_bulletin (bulletin) :
       
 def writeNHC(bulletin): 
 
+    IMAGE_CODES = {
+        'hurricanewarning': 'aviso_de_huracan',
+        'hurricanewatch': 'vigilancia_de_huracan',
+        'stormsurgewatch': 'vigilancia_de_inundaciones',
+        'tropicalstormwarning': 'aviso_de_tormenta_tropical',
+        'tropicalstormwatch': 'vigilancia_de_tormenta_tropical',
+    }
+
+    data , flags,signals,parsed_ids = get_tropical_bulletin(bulletin)
+    if signals["skip"] == True:
+        return {}
+    save_parsed_data(parsed_ids, 'NHCdata.json')
+    
+    generated_stories = []
+    if signals["practive"] == True and signals["noupdate"] == False :
+        logger.debug("writeNHC: practive")
         
-        data , flags,signals,parsed_ids = get_tropical_bulletin(bulletin)
-        if signals["skip"] == True:
-            return {}
-        # print(data)
-        # print(flags)
-        # print(signals)
-        save_parsed_data(parsed_ids, 'NHCdata.json')
-      
-        generated_stories = []
-        if signals["practive"] == True and signals["noupdate"] == False :
-            print("practive")
-            
-            for event in data["practive"]: 
-                eventtype= event["type"].replace(" ", "").lower()
-                with open("templates/story_templates/" + eventtype + ".html") as f:
-                    template = Template(f.read())
-                    new_story = template.render(data=data, event=event, flags=flags, signals=signals)
-                    soup = BeautifulSoup(new_story, 'html.parser')
-                    p_tags= soup.find_all('p')
-                    
-                    # with open("examples/"+eventtype + timestamp+  ".html", "w") as f:
-                    #     f.write(new_story)
-                    #     print("wrote " + eventtype + ".html")
-                    new_story= [re.sub(r'\s+', ' ', p.get_text(strip=True)) for p in p_tags if p.get_text(strip=True)]
-                    with open("templates/email_templates/storypublished.html") as f:
-                        emailtemplate = Template(f.read())
-                        emailcontent = emailtemplate.render(data=data, event=event, flags=flags, signals=signals)
-                        emailcontent= BeautifulSoup(emailcontent, 'html.parser').find_all('p')
-                        emailcontent= [re.sub(r'\s+', ' ', p.get_text(strip=True)) for p in emailcontent if p.get_text(strip=True)]
-                    new_story={"body": '\n'.join(new_story), "headline": data["headline"] , "event": event["type"], "email": '\n'.join(emailcontent)}
-                    generated_stories.append(new_story)
-            generated_stories= {"content": generated_stories, "action":"post" }
-        elif signals["practive"] == True and signals["noupdate"] == True : 
-            print("no update for active warning")
-            for event in data["practive"]:
-                eventtype= "no update for active warning"
-                with open("templates/email_templates/no_update.html") as f:
-                    template= Template(f.read())
-                    new_story = template.render(data=data, flags=flags , signals = signals)
-                    soup = BeautifulSoup(new_story, 'html.parser')
-                    p_tags= soup.find_all('p')
-                    new_story='\n'.join([ elem.get_text() for elem in p_tags])
-                    
-                    # with open("templates/emailexamples/"+eventtype +str(timestamp) +".html", "w") as f:
-                    #     f.write(new_story)
-                        #print("wrote email " + eventtype + ".html")
-                    new_story={"body": new_story , "headline": data["headline"] , "event": event["type"]}
-                    generated_stories= {"content": new_story , "action":"email"}
-                       
-                        
-        elif signals["nowarning"] == True or signals["practive"] == False :
-            print('not relevant')
-            eventtype= "no_warning"
-            with open("templates/email_templates/informational.html") as f:
+        for event in data["practive"]: 
+            eventtype= event["type"].replace(" ", "").lower()
+            with open("templates/story_templates/" + eventtype + ".html") as f:
+                template = Template(f.read())
+                new_story = template.render(data=data, event=event, flags=flags, signals=signals)
+                soup = BeautifulSoup(new_story, 'html.parser')
+                p_tags= soup.find_all('p')
+                
+                new_story= [re.sub(r'\s+', ' ', p.get_text(strip=True)) for p in p_tags if p.get_text(strip=True)]
+                with open("templates/email_templates/storypublished.html") as f:
+                    emailtemplate = Template(f.read())
+                    emailcontent = emailtemplate.render(data=data, event=event, flags=flags, signals=signals)
+                    emailcontent= BeautifulSoup(emailcontent, 'html.parser').find_all('p')
+                    emailcontent= [re.sub(r'\s+', ' ', p.get_text(strip=True)) for p in emailcontent if p.get_text(strip=True)]
+                new_story={
+                    "body": '\n'.join(new_story), 
+                    "headline": data["headline"] , 
+                    "event": event["type"], 
+                    "email": '\n'.join(emailcontent),
+                    'image_code': IMAGE_CODES.get(eventtype)
+                }
+                generated_stories.append(new_story)
+        generated_stories= {"content": generated_stories, "action":"post" }
+    elif signals["practive"] == True and signals["noupdate"] == True : 
+        logger.debug("no update for active warning")
+        for event in data["practive"]:
+            eventtype= "no update for active warning"
+            with open("templates/email_templates/no_update.html") as f:
                 template= Template(f.read())
-                new_story = template.render(data=data , flags=flags , signals = signals)
+                new_story = template.render(data=data, flags=flags , signals = signals)
                 soup = BeautifulSoup(new_story, 'html.parser')
                 p_tags= soup.find_all('p')
                 new_story='\n'.join([ elem.get_text() for elem in p_tags])
                 
-                # with open("emailexamples/" +note +".html", "w") as f:
+                # with open("templates/emailexamples/"+eventtype +str(timestamp) +".html", "w") as f:
                 #     f.write(new_story)
-                new_story={"body": new_story , "headline": data["headline"] }
+                    #print("wrote email " + eventtype + ".html")
+                new_story={"body": new_story , "headline": data["headline"] , "event": event["type"]}
                 generated_stories= {"content": new_story , "action":"email"}
-                
-                #print("wrote email " + eventtype + ".html")
-                        
-                        
-        
-        return generated_stories
-                        
+                    
+                    
+    elif signals["nowarning"] == True or signals["practive"] == False :
+        logger.debug('not relevant')
+        eventtype= "no_warning"
+        with open("templates/email_templates/informational.html") as f:
+            template= Template(f.read())
+            new_story = template.render(data=data , flags=flags , signals = signals)
+            soup = BeautifulSoup(new_story, 'html.parser')
+            p_tags= soup.find_all('p')
+            new_story='\n'.join([ elem.get_text() for elem in p_tags])
+            
+            # with open("emailexamples/" +note +".html", "w") as f:
+            #     f.write(new_story)
+            new_story={"body": new_story , "headline": data["headline"] }
+            generated_stories= {"content": new_story , "action":"email"}
+            
+                    
+    
+    return generated_stories
+                    
                         
 
     

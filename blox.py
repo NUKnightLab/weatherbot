@@ -51,7 +51,6 @@ def post_story(headline, content, image_code=None):
 
     if image_code:
         image_id = post_image(image_code)
-        print(f"posted image {image_id}")
         data['relationships'] = [{
             'id': image_id,
             'is_internal': True,
