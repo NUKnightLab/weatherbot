@@ -12,6 +12,12 @@ from email.message import EmailMessage
 import logging
 logger = logging.getLogger('util')
 
+try:
+    TRANSLATOR = deepl.Translator(os.environ['DEEPL_API_KEY'])
+except KeyError:
+    logger.warning("Missing DEEPL_API_KEY env variable. Translations will be a no-op")
+    TRANSLATOR = None
+
 def sendEmail(recipients, subject, body , url=None):
     if recipients is not None:
         SMTP_SERVER = "email-smtp.us-east-2.amazonaws.com"
@@ -61,20 +67,19 @@ def save_parsed_data(parsed_data,filepath):
         json.dump(parsed_data, file)
 
 def translate(lines):
-    auth_key = "2da7bbd3-33f4-6d8b-3f00-df289558e702:fx"
-    translator = deepl.Translator(auth_key)
-    text_for_translation = lines
+    if TRANSLATOR:
+        text_for_translation = lines
 
-    result = translator.translate_text(
-        text_for_translation,
-        source_lang="EN",
-        target_lang="ES",
-        formality="prefer_more",
-        split_sentences="nonewlines",
-        preserve_formatting=True ) # Corrected to a boolean value
-    
-    return result.text
-
+        result = TRANSLATOR.translate_text(
+            text_for_translation,
+            source_lang="EN",
+            target_lang="ES",
+            formality="prefer_more",
+            split_sentences="nonewlines",
+            preserve_formatting=True ) # Corrected to a boolean value
+        
+        return result.text
+    return lines
 
 def walk_storms (dir) : 
     for file in dir.glob("*.txt"):
