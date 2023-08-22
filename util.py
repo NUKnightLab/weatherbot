@@ -1,4 +1,3 @@
-# tools and tricks for working with weather feeds
 import deepl
 
 from pathlib import Path
