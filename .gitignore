@@ -3,6 +3,7 @@ bulletins
 NHCdata.json
 NWSdata.json
 nws_generated.json
+*.code-workspace
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
