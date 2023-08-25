@@ -17,7 +17,7 @@ WS_ROOT = 'https://www.elvocero.com/tncms/webservice/v1/'
 def make_cms_link(internal_id):
     return f"https://admin-newyork1.bloxcms.com/elvocero.com/editorial/article/{internal_id}"
 
-def post_story(headline, content, image_code=None):
+def post_story(headline, content, image_code=None, actually_post_articles=False):
     """Given materials relevant to a new article to be created in the CMS,
         execute the HTTP POST to create it.
 
@@ -32,6 +32,10 @@ def post_story(headline, content, image_code=None):
 
     # https://www.elvocero.com/tncms/webservice/#operation/editorial_create_asset_with_files
     url = f"{WS_ROOT}editorial/create_asset"
+
+    if not actually_post_articles:
+        logger.info("Post article flag not set. Details at debug level.")
+        
 
     now = datetime.now()
     start_time = now + timedelta(days=365*100) # during testing, use a date far in the future because stories go live when this date is now or past
@@ -50,33 +54,42 @@ def post_story(headline, content, image_code=None):
     }
 
     if image_code:
-        image_id = post_image(image_code)
-        data['relationships'] = [{
-            'id': image_id,
-            'is_internal': True,
-            'type': 'child',
-            'app': 'editorial'
-        }]
+        if actually_post_articles:
+            image_id = post_image(image_code)
+            data['relationships'] = [{
+                'id': image_id,
+                'is_internal': True,
+                'type': 'child',
+                'app': 'editorial'
+            }]
+        else:
+            logger.debug(f"would have posted image code: {image_code}")
 
     files = {
         'metadata': ('story.json', json.dumps(data), 'application/json')
     }
 
-    if image_code: # need to test this twice because of the different places the images go
-        preview_image_path = get_image(image_code)
-        files['preview'] = preview_image_path.open('rb')
+    if actually_post_articles:
+        if image_code: # need to test this twice because of the different places the images go
+            preview_image_path = get_image(image_code)
+            files['preview'] = preview_image_path.open('rb')
 
-    resp = requests.post(url, auth=(AUTH_USER,AUTH_SECRET), files=files)
+        resp = requests.post(url, auth=(AUTH_USER,AUTH_SECRET), files=files)
 
-    if resp.ok:
-        resp_json = resp.json()
-        internal_id = resp_json['internalid']
-        logger.info(f"posted story {internal_id}")
-        return internal_id
+        if resp.ok:
+            resp_json = resp.json()
+            internal_id = resp_json['internalid']
+            logger.info(f"posted story {internal_id}")
+            return internal_id
+        else:
+            logger.warning(f"Failed to post [{headline}] response code [{resp.status_code}]")
+            logger.warning(resp.text)
+            return None
     else:
-        logger.warning(f"Failed to post [{headline}] response code [{resp.status_code}]")
-        logger.warning(resp.text)
-        return None
+        logger.debug("article content:")
+        logger.debug(json.dumps(data, indent=2))
+        logger.debug('-------')
+        return 'fake-internal-article-id'
 
 def get_image(image_code):
     img_path = Path(f"images/{image_code}.jpg")

@@ -11,13 +11,7 @@ from email.message import EmailMessage
 import logging
 logger = logging.getLogger('util')
 
-try:
-    TRANSLATOR = deepl.Translator(os.environ['DEEPL_API_KEY'])
-except KeyError:
-    logger.warning("Missing DEEPL_API_KEY env variable. Translations will be a no-op")
-    TRANSLATOR = None
-
-def sendEmail(recipients, subject, body , url=None):
+def send_email(recipients, subject, body , url=None, actually_send_email=False):
     if recipients is not None:
         SMTP_SERVER = "email-smtp.us-east-2.amazonaws.com"
         SMTP_USERNAME = os.environ['SMTP_USERNAME']
@@ -32,10 +26,18 @@ def sendEmail(recipients, subject, body , url=None):
             body = body + "\n\n" + "el articulo se puede encontrar en " + url
         msg.set_content(body)
 
-        with SMTP(SMTP_SERVER) as smtp:
-            smtp.starttls()
-            smtp.login(SMTP_USERNAME, SMTP_PASSWORD)
-            smtp.send_message(msg)
+        if actually_send_email:
+            with SMTP(SMTP_SERVER) as smtp:
+                smtp.starttls()
+                smtp.login(SMTP_USERNAME, SMTP_PASSWORD)
+                smtp.send_message(msg)
+        else:
+            logger.info("Email send not enabled. Details at debug")
+            logger.debug(f"To: {recipients}")
+            logger.debug(f"From: {SENDER_EMAIL}")
+            logger.debug(f"Body:")
+            logger.debug(body)
+            logger.debug('---------')
     else:
         logger.debug(f"sendEmail but No recipients")
         logger.debug(f"subject: {subject}")
@@ -65,20 +67,29 @@ def save_parsed_data(parsed_data,filepath):
     with open(filepath, "w") as file:
         json.dump(parsed_data, file)
 
-def translate(lines):
-    if TRANSLATOR:
-        text_for_translation = lines
+def get_translator_func():
+    """Making this a factory function lets us see that the key isn't set without logging something
+    every single time translate is called. Before we did it when this file was compiled, which led to
+    log messages being lost because logging hadn't been configured yet."""
+    try:
+        TRANSLATOR = deepl.Translator(os.environ['DEEPL_API_KEY'])
+        def translate(lines):
+            result = TRANSLATOR.translate_text(
+                text_for_translation,
+                source_lang="EN",
+                target_lang="ES",
+                formality="prefer_more",
+                split_sentences="nonewlines",
+                preserve_formatting=True ) # Corrected to a boolean value
+            
+            return result.text
+        return translate
+    except KeyError:
+        logger.warning("Missing DEEPL_API_KEY env variable. Translations will be a no-op")
+        def noop_translate(lines):
+            return lines
+        return noop_translate
 
-        result = TRANSLATOR.translate_text(
-            text_for_translation,
-            source_lang="EN",
-            target_lang="ES",
-            formality="prefer_more",
-            split_sentences="nonewlines",
-            preserve_formatting=True ) # Corrected to a boolean value
-        
-        return result.text
-    return lines
 
 def walk_storms (dir) : 
     for file in dir.glob("*.txt"):

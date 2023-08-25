@@ -1,5 +1,5 @@
 import json 
-from util import load_parsed_data, save_parsed_data, contains_area, translate
+from util import load_parsed_data, save_parsed_data, contains_area, get_translator_func
 from jinja2 import Template
 from datetime import datetime
 import requests
@@ -30,6 +30,9 @@ def fetch_nws_data():
 
 
 def get_weather_bulletin(bulletin):
+
+    translate = get_translator_func()
+
     data = []
     areas = ["puerto rico", "vieques","culebra" , "pr"]
 
@@ -44,21 +47,6 @@ def get_weather_bulletin(bulletin):
         'heat warning': 'calor_extremo', 
         'rip current statement': None
     }
-
-# image codes
-# 'aviso_de_huracan',
-# 'aviso_de_inundaciones',
-# 'aviso_de_tormenta_tropical',
-# 'calor_extremo',
-# 'marejada_ciclonica',
-# 'reisgo_en_el_mar',
-# 'reporte_especial',
-# 'reporte_especial_de_huracan',
-# 'vigilancia_de_huracan',
-# 'vigilancia_de_inundaciones',
-# 'vigilancia_de_tormenta_tropical',
-
-
 
     #pub date , end time , event , areas affected, headline , what , where , impacts 
    
@@ -171,7 +159,7 @@ def format_list_strings(strings):
 # Given a bulletin from the NWS, see if stories should be written
 # for each event that needs a story, generate the content 
 # return a list of story content for dispatch elsewhere
-def writeNWS(bulletin) :
+def generate_nws_stories(bulletin) :
     data, parsed_ids = get_weather_bulletin(bulletin)
     save_parsed_data(parsed_ids, 'NWSdata.json') # log what we've seen
     

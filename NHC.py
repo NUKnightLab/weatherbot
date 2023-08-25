@@ -1,7 +1,7 @@
 import re
 from bs4 import BeautifulSoup
 
-from util import translate,load_parsed_data , save_parsed_data,contains_area
+from util import get_translator_func,load_parsed_data , save_parsed_data,contains_area
 from jinja2 import Template
 
 import logging
@@ -12,6 +12,9 @@ def clean_str(str):
     return str
 
 def get_tropical_bulletin(bulletin):
+
+    translate = get_translator_func()
+
     parsed_ids = load_parsed_data('NHCdata.json')
     data = {}
     separatorpattern = r"\.\s+"
