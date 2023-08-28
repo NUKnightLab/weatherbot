@@ -102,26 +102,34 @@ def main_nhc(testfile=None, actually_send_email=False, actually_post_articles=Fa
     results = []
 
     if testfile:
-        results.append(writeNHC(testfile))
+        try:
+            results.append(writeNHC(testfile))
+        except Exception as e:
+            logger.error(f"Error processing bulletin {testfile}")
+            logger.exception(e)
     else:
         for url in nhc_urls:
-            wallet = url.split("xml/")[1].split(".xml")[0]
-            response = requests.get(url)
-            if response.status_code == 200:
-                textid = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
-                response.encoding = 'utf-8'
-                
-                filelocation = os.path.join(tcpat_directory, f"{wallet}_{textid}.xml")
-                
-                with open(filelocation, "w") as file:
-                    file.write(response.text) 
-                parsed = writeNHC(StringIO(response.text)) 
-                if parsed== {}:
-                    pass # TODO: this was "return" which would skip any URLs after this case
+            try:
+                wallet = url.split("xml/")[1].split(".xml")[0]
+                response = requests.get(url)
+                if response.status_code == 200:
+                    textid = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+                    response.encoding = 'utf-8'
+                    
+                    filelocation = os.path.join(tcpat_directory, f"{wallet}_{textid}.xml")
+                    
+                    with open(filelocation, "w") as file:
+                        file.write(response.text) 
+                    parsed = writeNHC(StringIO(response.text)) 
+                    if parsed== {}:
+                        pass # TODO: this was "return" which would skip any URLs after this case. Make sure there wasn't a reason for it.
+                    else:
+                        results.append(parsed)
                 else:
-                    results.append(parsed)
-            else:
-                logger.warning(f"Failed to retrieve NHC API data. Status code {response.status_code}")
+                    logger.warning(f"Failed to retrieve NHC API data. Status code {response.status_code}")
+            except Exception as e:
+                logger.error(f"Error processing bulletin {url}")
+                logger.exception(e)
 
     if results:
         for parsed in results:
@@ -143,6 +151,11 @@ def main(test_mode=False, actually_send_email=False, actually_post_articles=Fals
     configure_logging(logger)
 
     logger.info("Weatherbot begin")
+    if not actually_post_articles:
+        logger.info("Post articles flag is not set. No articles will be posted")
+    if not actually_send_email:
+        logger.info("Send email flag is not set. No email will be sent")
+        
     if test_mode:
         logger.debug('test mode')
         if nws_testfile:
@@ -154,8 +167,16 @@ def main(test_mode=False, actually_send_email=False, actually_post_articles=Fals
         else:
             logger.debug("No NHC test file, skipping")
     else:
-        main_nws(actually_send_email=actually_send_email, actually_post_articles=actually_post_articles)
-        main_nhc(actually_send_email=actually_send_email, actually_post_articles=actually_post_articles)
+        try:
+            main_nws(actually_send_email=actually_send_email, actually_post_articles=actually_post_articles)
+        except Exception as e:
+            logger.error(f"Uncaught exception in main_nws: {e}")
+            logger.exception(e)
+        try:
+            main_nhc(actually_send_email=actually_send_email, actually_post_articles=actually_post_articles)
+        except Exception as e:
+            logger.error(f"Uncaught exception in main_nhc: {e}")
+            logger.exception(e)
 
     logger.info("Weatherbot complete")
 
@@ -176,7 +197,8 @@ if __name__ == "__main__":
     parser.add_argument('--nhc', nargs="?", type=argparse.FileType('r'))
     parser.add_argument('-p', '--post', help="Post articles to CMS", action="store_true")
     parser.add_argument('-e', '--email', help="Send emails", action="store_true")
+
     args = parser.parse_args()
     test_mode = args.nhc or args.nws
-    print(args)
+
     main(test_mode, actually_send_email=args.email, actually_post_articles=args.post, nws_testfile=args.nws, nhc_testfile=args.nhc)

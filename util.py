@@ -75,7 +75,7 @@ def get_translator_func():
         TRANSLATOR = deepl.Translator(os.environ['DEEPL_API_KEY'])
         def translate(lines):
             result = TRANSLATOR.translate_text(
-                text_for_translation,
+                lines,
                 source_lang="EN",
                 target_lang="ES",
                 formality="prefer_more",
