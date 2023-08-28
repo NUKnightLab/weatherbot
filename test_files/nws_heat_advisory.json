@@ -1,0 +1,104 @@
+{
+  "@context": [
+    "https://geojson.org/geojson-ld/geojson-context.jsonld",
+    {
+      "@version": "1.1",
+      "wx": "https://api.weather.gov/ontology#",
+      "@vocab": "https://api.weather.gov/ontology#"
+    }
+  ],
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.294896e9b91697b4743e6f21607819b905e77876.001.1",
+      "type": "Feature",
+      "geometry": null,
+      "properties": {
+        "@id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.294896e9b91697b4743e6f21607819b905e77876.001.1",
+        "@type": "wx:Alert",
+        "id": "urn:oid:2.49.0.1.840.0.294896e9b91697b4743e6f21607819b905e77876.001.1",
+        "areaDesc": "San Juan and Vicinity; North Central; Northwest; Mayaguez and Vicinity; Culebra; Vieques",
+        "geocode": {
+          "SAME": [
+            "072021",
+            "072031",
+            "072033",
+            "072061",
+            "072127",
+            "072135",
+            "072137",
+            "072139",
+            "072013",
+            "072017",
+            "072051",
+            "072054",
+            "072091",
+            "072143",
+            "072145",
+            "072005",
+            "072027",
+            "072065",
+            "072071",
+            "072115",
+            "072003",
+            "072011",
+            "072067",
+            "072097",
+            "072099",
+            "072117",
+            "072125",
+            "072049",
+            "072147"
+          ],
+          "UGC": ["PRZ001", "PRZ005", "PRZ008", "PRZ010", "PRZ012", "PRZ013"]
+        },
+        "affectedZones": [
+          "https://api.weather.gov/zones/forecast/PRZ001",
+          "https://api.weather.gov/zones/forecast/PRZ005",
+          "https://api.weather.gov/zones/forecast/PRZ008",
+          "https://api.weather.gov/zones/forecast/PRZ010",
+          "https://api.weather.gov/zones/forecast/PRZ012",
+          "https://api.weather.gov/zones/forecast/PRZ013"
+        ],
+        "references": [
+          {
+            "@id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.d98e86606645ec704b08c331d111b2a2e5869d4a.001.1",
+            "identifier": "urn:oid:2.49.0.1.840.0.d98e86606645ec704b08c331d111b2a2e5869d4a.001.1",
+            "sender": "w-nws.webmaster@noaa.gov",
+            "sent": "2023-08-28T03:57:00-04:00"
+          }
+        ],
+        "sent": "2023-08-28T11:21:00-04:00",
+        "effective": "2023-08-28T11:21:00-04:00",
+        "onset": "2023-08-28T11:21:00-04:00",
+        "expires": "2023-08-28T16:00:00-04:00",
+        "ends": "2023-08-28T16:00:00-04:00",
+        "status": "Actual",
+        "messageType": "Update",
+        "category": "Met",
+        "severity": "Moderate",
+        "certainty": "Likely",
+        "urgency": "Expected",
+        "event": "Heat Advisory",
+        "sender": "w-nws.webmaster@noaa.gov",
+        "senderName": "NWS San Juan PR",
+        "headline": "Heat Advisory issued August 28 at 11:21AM AST until August 28 at 4:00PM AST by NWS San Juan PR",
+        "description": "* WHAT...Heat index values of 108 to 111 degrees Fahrenheit.\n\n* WHERE...The urban and coastal areas from west/northwest Puerto\nRico to San Juan and vicinity, Culebra, and Vieques.\n\n* WHEN...through 4 PM AST today.\n\n* IMPACTS...Heat exhaustion is possible with prolonged exposure.\nHeat stroke possible.",
+        "instruction": "A Heat Advisory means that a period of hot temperatures is\nexpected. The combination of hot temperatures and high humidity\nwill combine to create a situation in which heat illnesses are\npossible. Drink plenty of fluids, stay in an air-conditioned\nroom, stay out of the sun, and check up on relatives and\nneighbors.\n\nTake extra precautions, if you work or spend time outside. When\npossible, reschedule strenuous activities to early morning or\nevening. Know the signs and symptoms of heat exhaustion and heat\nstroke. Wear light weight and loose fitting clothing when\npossible and drink plenty of water.",
+        "response": "Execute",
+        "parameters": {
+          "AWIPSidentifier": ["NPWSJU"],
+          "WMOidentifier": ["WWCA72 TJSJ 281521"],
+          "NWSheadline": [
+            "HEAT ADVISORY REMAINS IN EFFECT UNTIL 4 PM AST THIS AFTERNOON"
+          ],
+          "BLOCKCHANNEL": ["EAS", "NWEM", "CMAS"],
+          "VTEC": ["/O.CON.TJSJ.HT.Y.0084.000000T0000Z-230828T2000Z/"],
+          "eventEndingTime": ["2023-08-28T20:00:00+00:00"]
+        }
+      }
+    }
+  ],
+  "title": "Current watches, warnings, and advisories for Puerto Rico",
+  "updated": "2023-08-28T15:22:12+00:00"
+}
