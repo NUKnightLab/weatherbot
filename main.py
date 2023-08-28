@@ -107,7 +107,7 @@ def main_nhc(testfile=None, actually_send_email=False, actually_post_articles=Fa
         try:
             results.append(writeNHC(testfile))
         except ValueError as e: # we don't need stack trace for this. This seems overly complex tho, should be able to trap better
-            logger.error(f"Error processing bulletin {testfile}")
+            logger.error(f"Error processing bulletin {testfile} {e}")
         except Exception as e:
             logger.error(f"Error processing bulletin {testfile}")
             logger.exception(e)
@@ -132,7 +132,7 @@ def main_nhc(testfile=None, actually_send_email=False, actually_post_articles=Fa
                 else:
                     logger.warning(f"Failed to retrieve NHC API data. Status code {response.status_code}")
             except ValueError as e: # we don't need stack trace for this. This seems overly complex tho, should be able to trap better
-                logger.error(f"Error processing bulletin {url}")
+                logger.error(f"Error processing bulletin {url} {e}")
             except Exception as e:
                 logger.error(f"Error processing bulletin {url}")
                 logger.exception(e)
@@ -156,7 +156,9 @@ def main_nhc(testfile=None, actually_send_email=False, actually_post_articles=Fa
 def main(test_mode=False, actually_send_email=False, actually_post_articles=False, nws_testfile=None, nhc_testfile=None):
     configure_logging(logger)
 
-    logger.info("Weatherbot begin")
+    runtime_marker = datetime.datetime.now().strftime('%Y-%m-%d_%H:%M')
+    logger.info(f"------- Weatherbot begin {runtime_marker}")
+
     if not actually_post_articles:
         logger.info("Post articles flag is not set. No articles will be posted")
     if not actually_send_email:
@@ -188,7 +190,7 @@ def main(test_mode=False, actually_send_email=False, actually_post_articles=Fals
             logger.error(f"Uncaught exception in main_nhc: {e}")
             logger.exception(e)
 
-    logger.info("Weatherbot complete")
+    logger.info(f"------- Weatherbot complete {runtime_marker}")
 
 
    
