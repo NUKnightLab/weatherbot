@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+#
 # When executed, this script checks data feeds from the 
 # National Weather Service and the National Hurricane Center
 # Feed data is evaluated based on rules provided by El Vocero
@@ -50,7 +52,7 @@ def configure_logging(logger):
     urllib3_logger.setLevel(logging.INFO) # chatty at DEBUG
 
     
-def main_nws(testfile=None, actually_send_email=False, actually_post_articles=False):
+def main_nws(testfile=None, actually_post_articles=False):
     nwsjson_directory = "bulletins/NWSjson"
     initialize_directory(nwsjson_directory)
 
@@ -104,6 +106,8 @@ def main_nhc(testfile=None, actually_send_email=False, actually_post_articles=Fa
     if testfile:
         try:
             results.append(writeNHC(testfile))
+        except ValueError as e: # we don't need stack trace for this. This seems overly complex tho, should be able to trap better
+            logger.error(f"Error processing bulletin {testfile}")
         except Exception as e:
             logger.error(f"Error processing bulletin {testfile}")
             logger.exception(e)
@@ -127,6 +131,8 @@ def main_nhc(testfile=None, actually_send_email=False, actually_post_articles=Fa
                         results.append(parsed)
                 else:
                     logger.warning(f"Failed to retrieve NHC API data. Status code {response.status_code}")
+            except ValueError as e: # we don't need stack trace for this. This seems overly complex tho, should be able to trap better
+                logger.error(f"Error processing bulletin {url}")
             except Exception as e:
                 logger.error(f"Error processing bulletin {url}")
                 logger.exception(e)
@@ -158,20 +164,24 @@ def main(test_mode=False, actually_send_email=False, actually_post_articles=Fals
         
     if test_mode:
         logger.debug('test mode')
+
         if nws_testfile:
-            main_nws(nws_testfile, actually_send_email=actually_send_email, actually_post_articles=actually_post_articles)
+            main_nws(testfile=nws_testfile,  actually_post_articles=actually_post_articles)
         else:
             logger.debug("No NWS test file, skipping")
+
         if nhc_testfile:
             main_nhc(nhc_testfile, actually_send_email=actually_send_email, actually_post_articles=actually_post_articles)
         else:
             logger.debug("No NHC test file, skipping")
     else:
+
         try:
-            main_nws(actually_send_email=actually_send_email, actually_post_articles=actually_post_articles)
+            main_nws(actually_post_articles=actually_post_articles)
         except Exception as e:
             logger.error(f"Uncaught exception in main_nws: {e}")
             logger.exception(e)
+
         try:
             main_nhc(actually_send_email=actually_send_email, actually_post_articles=actually_post_articles)
         except Exception as e:

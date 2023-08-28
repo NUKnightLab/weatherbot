@@ -51,7 +51,7 @@ def contains_area(in_string, arealist):
             return True
     return False
 
-def load_parsed_data(filepath):
+def load_parsed_data(filepath: str) -> dict:
     parsed_data = {}
     if os.path.exists(filepath) and os.path.getsize(filepath) > 0:
         try:
