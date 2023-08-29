@@ -11,13 +11,13 @@ from email.message import EmailMessage
 import logging
 logger = logging.getLogger('util')
 
+SMTP_SERVER = "email-smtp.us-east-2.amazonaws.com"
+SMTP_USERNAME = os.environ['SMTP_USERNAME']
+SMTP_PASSWORD = os.environ['SMTP_PASSWORD']
+SENDER_EMAIL = 'Automated Message Sender <knightlab@northwestern.edu>'
+
 def send_email(recipients, subject, body , url=None, actually_send_email=False):
     if recipients is not None:
-        SMTP_SERVER = "email-smtp.us-east-2.amazonaws.com"
-        SMTP_USERNAME = os.environ['SMTP_USERNAME']
-        SMTP_PASSWORD = os.environ['SMTP_PASSWORD']
-        SENDER_EMAIL = 'Automated Message Sender <knightlab@northwestern.edu>'
-
         msg = EmailMessage()
         msg['From'] = SENDER_EMAIL
         msg['To'] = recipients
@@ -27,6 +27,7 @@ def send_email(recipients, subject, body , url=None, actually_send_email=False):
         msg.set_content(body)
 
         if actually_send_email:
+            logger.info(f"send_email [{subject}] to [{recipients}]")
             with SMTP(SMTP_SERVER) as smtp:
                 smtp.starttls()
                 smtp.login(SMTP_USERNAME, SMTP_PASSWORD)
