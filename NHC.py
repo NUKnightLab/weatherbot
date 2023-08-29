@@ -12,15 +12,23 @@ def clean_str(str):
     return str
 
 def get_tropical_bulletin(bulletin):
+    PARSED_ID_FILE = 'NHCdata.json'
 
     translate = get_translator_func()
 
-    parsed_ids = load_parsed_data('NHCdata.json')
-    data = {}
+    parsed_ids = load_parsed_data(PARSED_ID_FILE)
     separatorpattern = r"\.\s+"
     area = ["puerto rico", "vieques","culebra"]  
+
+    data = {}
     signals= {"nowarning": False, "noupdate": False, "practive": False, "interest": False , "skip": False}
     hazardflags= {"rain": False, "surge": False, "tornadoes": False, "surf": False, "rainfacts": False, "surgefacts": False}
+    results = {
+        'data': data,
+        'flags': hazardflags,
+        'signals': signals        
+    }
+
     soup = BeautifulSoup(bulletin , features="xml")
 
     items = soup.find_all('item')
@@ -28,7 +36,7 @@ def get_tropical_bulletin(bulletin):
     if stormname in parsed_ids:
         logger.debug(f"ID '{stormname}' has already been processed. Skipping...")
         signals["skip"] = True
-        return data , hazardflags , signals , parsed_ids
+        return results
     else:
         logger.debug(f"Processing ID '{stormname}'...")
         parsed_ids[stormname] = True
@@ -126,29 +134,33 @@ def get_tropical_bulletin(bulletin):
         
         data["events"] = []
         for match in matches: 
-            
-            #
-            event = {}
-            event["type"] = match
-            event["places"] = []  
-            event["relevant"] = False
-            index = warnings.index("A " +match+ " is in effect for...") +1
-            #find all events and for each event places 
-            while index < len(warnings) and warnings[index] != '$':
-                place = warnings[index].replace("* ", "").strip()
-                event["places"].append(translate(place))
-                if place.casefold().__contains__("puerto rico"):
-                    event["relevant"] = True
+            try:
+                event = {}
+                event["type"] = match
+                event["places"] = []  
+                event["relevant"] = False
+                index = warnings.index("A " +match+ " is in effect for...") +1
+                #find all events and for each event places 
+                while index < len(warnings) and warnings[index] != '$':
+                    place = warnings[index].replace("* ", "").strip()
+                    event["places"].append(translate(place))
+                    if place.casefold().__contains__("puerto rico"):
+                        event["relevant"] = True
 
-                    
-                index += 1
-            data["events"].append(event)
+                        
+                    index += 1
+                data["events"].append(event)
+            except ValueError as e:
+                logger.warning(f"Error making event for match [{match}] {e}")
+
         data["practive"] = []
+
         for event in data["events"]:
             if event["relevant"] == True :
                 data["practive"].append(event)
                 signals["practive"] = True
-    #hazards affecting land
+
+        #hazards affecting land
         hazards = desc.split("HAZARDS AFFECTING LAND",1)[1].split("FORECASTER",1)[0]
         #rainfall
         rainpattern = r"RAINFALL:(.*?)\.\s*(?:WIND:|TORNADOES:|SURF:|NEXT ADVISORY|STORM SURGE:|$$)"
@@ -255,9 +267,13 @@ def get_tropical_bulletin(bulletin):
                 data["tornadoes"] = tornadodata
             
 
-    return data, hazardflags, signals, parsed_ids
-      
-def writeNHC(bulletin): 
+    
+    save_parsed_data(parsed_ids, PARSED_ID_FILE)
+
+    return results
+
+# not sure how to mark type for bulletin which is a FLO (either StringIO or file opened by argparse)
+def writeNHC(bulletin) -> dict: 
     """Given a file-like object representing an NHC XML file, parse it, analyze it,
     and return a dictionary. This dictionary may be empty, or it may have various keys
     which govern what should be done based on the bulletin's contents, including posting 
@@ -272,46 +288,45 @@ def writeNHC(bulletin):
         'tropicalstormwatch': 'vigilancia_de_tormenta_tropical',
     }
 
-    data, flags, signals, parsed_ids = get_tropical_bulletin(bulletin)
-    if signals["skip"] == True:
+    results = get_tropical_bulletin(bulletin)
+    if results['signals']['skip']:
         return {}
-    save_parsed_data(parsed_ids, 'NHCdata.json')
-    
+
     generated_stories = []
-    if signals["practive"]:
+    if results['signals']["practive"]:
         logger.debug("writeNHC: practive")
-        if signals["noupdate"]:
+        if results['signals']["noupdate"]:
             logger.debug("no update for active warning")
-            event = data['practive'][0]
+            event = results['data']['practive'][0]
             with open("templates/email_templates/no_update.html") as f:
                 template= Template(f.read())
-                new_story = template.render(data=data, flags=flags , signals=signals)
+                new_story = template.render(data=results['data'], flags=results['flags'] , signals=results['signals'])
                 return {
                     "content": {
                         "body": new_story, 
-                        "headline": data["headline"], 
+                        "headline": results['data']["headline"], 
                         "event": event["type"]
                     },
                     "action":"email"
                 }
         else:
-            for event in data["practive"]: 
+            for event in results['data']["practive"]: 
                 eventtype= event["type"].replace(" ", "").lower()
                 with open("templates/story_templates/" + eventtype + ".html") as f:
                     template = Template(f.read())
-                    new_story = template.render(data=data, event=event, flags=flags, signals=signals)
+                    new_story = template.render(data=results['data'], event=event, flags=results['flags'], signals=results['signals'])
                     soup = BeautifulSoup(new_story, 'html.parser')
                     p_tags= soup.find_all('p')
                     
                     new_story= [re.sub(r'\s+', ' ', p.get_text(strip=True)) for p in p_tags if p.get_text(strip=True)]
                     with open("templates/email_templates/storypublished.html") as f:
                         emailtemplate = Template(f.read())
-                        emailcontent = emailtemplate.render(data=data, event=event, flags=flags, signals=signals)
+                        emailcontent = emailtemplate.render(data=results['data'], event=event, flags=results['flags'], signals=results['signals'])
                         emailcontent= BeautifulSoup(emailcontent, 'html.parser').find_all('p')
                         emailcontent= [re.sub(r'\s+', ' ', p.get_text(strip=True)) for p in emailcontent if p.get_text(strip=True)]
                     new_story={
                         "body": '\n'.join(new_story), 
-                        "headline": data["headline"] , 
+                        "headline": results['data']["headline"] , 
                         "event": event["type"], 
                         "email": '\n'.join(emailcontent),
                         'image_code': IMAGE_CODES.get(eventtype)
@@ -321,23 +336,24 @@ def writeNHC(bulletin):
                 "content": generated_stories, 
                 "action":"post" 
             }
-    elif signals["nowarning"]:
+    elif results['signals']["nowarning"]:
         logger.debug('not relevant')
         eventtype= "no_warning"
         with open("templates/email_templates/informational.html") as f:
             template= Template(f.read())
-            new_story = template.render(data=data , flags=flags , signals = signals)
+            new_story = template.render(data=results['data'] , flags=results['flags'] , signals = results['signals'])
             soup = BeautifulSoup(new_story, 'html.parser')
             p_tags= soup.find_all('p')
             new_story='\n'.join([ elem.get_text() for elem in p_tags])
-            new_story={"body": new_story , "headline": data["headline"] }
-            return {
-                "content": new_story, 
-                "action":"email"
-            }
+            new_story={"body": new_story , "headline": results['data']["headline"] }
+        return {
+            "content": new_story, 
+            "action":"email"
+        }
 
-    return generated_stories
                     
+    logger.warning(f"writeNHC finished with no clear return value")
+    return {}
                         
 
     

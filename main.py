@@ -109,7 +109,7 @@ def main_nhc(testfile=None, actually_send_email=False, actually_post_articles=Fa
         except ValueError as e: # we don't need stack trace for this. This seems overly complex tho, should be able to trap better
             logger.error(f"Error processing bulletin {testfile} {e}")
         except Exception as e:
-            logger.error(f"Error processing bulletin {testfile}")
+            logger.error(f"Error processing bulletin {testfile} {e}")
             logger.exception(e)
     else:
         for url in nhc_urls:
@@ -131,10 +131,10 @@ def main_nhc(testfile=None, actually_send_email=False, actually_post_articles=Fa
                         results.append(parsed)
                 else:
                     logger.warning(f"Failed to retrieve NHC API data. Status code {response.status_code}")
-            except ValueError as e: # we don't need stack trace for this. This seems overly complex tho, should be able to trap better
-                logger.error(f"Error processing bulletin {url} {e}")
+            # except ValueError as e: # we don't need stack trace for this. This seems overly complex tho, should be able to trap better
+            #     logger.error(f"Error processing bulletin {url} {e}")
             except Exception as e:
-                logger.error(f"Error processing bulletin {url}")
+                logger.error(f"Error processing bulletin {url} {e}")
                 logger.exception(e)
 
     if results:

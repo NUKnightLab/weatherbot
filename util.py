@@ -57,13 +57,17 @@ def load_parsed_data(filepath: str) -> dict:
         try:
             with open(filepath, "r") as file:
                 parsed_data = json.load(file)
+            if type(parsed_data) != dict: # typing should maybe make this irrelevant?
+                logger.warning(f"Loaded {filepath} but got a non-dict {parsed_ids}")
+                parsed_ids = {}
+
         except json.JSONDecodeError:
             # Handle JSONDecodeError (invalid JSON file)
             pass
     return parsed_data
 
 # Function to save the updated parsed IDs and their corresponding file contents to JSON
-def save_parsed_data(parsed_data,filepath):
+def save_parsed_data(parsed_data: dict, filepath: str):
     with open(filepath, "w") as file:
         json.dump(parsed_data, file)
 

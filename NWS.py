@@ -30,7 +30,7 @@ def fetch_nws_data():
 
 
 def get_weather_bulletin(bulletin):
-
+    PARSED_ID_FILE = 'NWSdata.json'
     translate = get_translator_func()
 
     data = []
@@ -50,7 +50,8 @@ def get_weather_bulletin(bulletin):
 
     #pub date , end time , event , areas affected, headline , what , where , impacts 
    
-    parsed_ids=load_parsed_data('NWSdata.json') # TODO the importance of this file is buried. Wny not pass the data in as an argument for maximum clarity?
+    parsed_ids=load_parsed_data(PARSED_ID_FILE) 
+
     with open(bulletin) as f :
         bulletin = json.load(f)
 
@@ -140,8 +141,13 @@ def get_weather_bulletin(bulletin):
                     # print("storm_surge", eventdict['storm_surge'])
           
             data.append(eventdict)
-        
-    return data, parsed_ids
+
+        if type(parsed_ids) == dict:
+            save_parsed_data(parsed_ids, PARSED_ID_FILE)
+        else:
+            logger.warning(f"save_parsed_ids got non-dict, so not saving {parsed_ids}")
+
+    return data
 
 
 def format_list_strings(strings):
@@ -160,9 +166,8 @@ def format_list_strings(strings):
 # for each event that needs a story, generate the content 
 # return a list of story content for dispatch elsewhere
 def generate_nws_stories(bulletin) :
-    data, parsed_ids = get_weather_bulletin(bulletin)
-    save_parsed_data(parsed_ids, 'NWSdata.json') # log what we've seen
-    
+    data = get_weather_bulletin(bulletin)
+
     generated_stories=[]
 
     for event in data:
