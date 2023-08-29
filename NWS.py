@@ -1,5 +1,5 @@
 import json 
-from util import load_parsed_data, save_parsed_data, contains_area, get_translator_func
+from util import load_parsed_data, save_parsed_data, contains_area, Translator
 from jinja2 import Template
 from datetime import datetime
 import requests
@@ -31,7 +31,7 @@ def fetch_nws_data():
 
 def get_weather_bulletin(bulletin):
     PARSED_ID_FILE = 'NWSdata.json'
-    translate = get_translator_func()
+    translate = Translator()
 
     data = []
     areas = ["puerto rico", "vieques","culebra" , "pr"]

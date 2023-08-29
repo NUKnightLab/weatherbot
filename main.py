@@ -70,10 +70,10 @@ def main_nws(testfile=None, actually_post_articles=False):
 
     # TODO: pass JSON instead of file
     generated = generate_nws_stories(filelocation)
-
-    with open("nws_generated.json", 'w') as f: # temporary
-        json.dump(generated, f, indent=2)
-        logger.debug("wrote nws_generated.json")
+    if generated:
+        with open("nws_generated.json", 'w') as f: # temporary
+            json.dump(generated, f, indent=2)
+            logger.debug("wrote nws_generated.json")
 
     for story in generated:
         post_story(story["headline"], story["content"] , story.get('image_code'), actually_post_articles=actually_post_articles)

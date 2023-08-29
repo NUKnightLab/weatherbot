@@ -71,29 +71,35 @@ def save_parsed_data(parsed_data: dict, filepath: str):
     with open(filepath, "w") as file:
         json.dump(parsed_data, file)
 
-def get_translator_func():
-    """Making this a factory function lets us see that the key isn't set without logging something
-    every single time translate is called. Before we did it when this file was compiled, which led to
-    log messages being lost because logging hadn't been configured yet."""
-    try:
-        TRANSLATOR = deepl.Translator(os.environ['DEEPL_API_KEY'])
-        def translate(lines):
-            result = TRANSLATOR.translate_text(
-                lines,
-                source_lang="EN",
-                target_lang="ES",
-                formality="prefer_more",
-                split_sentences="nonewlines",
-                preserve_formatting=True ) # Corrected to a boolean value
-            
-            return result.text
-        return translate
-    except KeyError:
-        logger.warning("Missing DEEPL_API_KEY env variable. Translations will be a no-op")
-        def noop_translate(lines):
-            return lines
-        return noop_translate
+class Translator(object):
+    """A callable which manages translation with DeepL, if its configured, or just passes text through otherwise"""
+    auth_ok = False
+    translator = None
+    logger = logging.getLogger('Translator')
+    def __init__(self) -> None:
+        api_key = os.environ.get('DEEPL_API_KEY')
+        if api_key:
+            self.translator = deepl.Translator(api_key)
+            self.auth_ok = True
+        else:
+            self.logger.warning("Missing DEEPL_API_KEY env variable. Translations will be a no-op")
 
+    def __call__(self, lines: str) -> str:
+        if self.translator and self.auth_ok:
+            try:
+                result = self.translator.translate_text(
+                    lines,
+                    source_lang="EN",
+                    target_lang="ES",
+                    formality="prefer_more",
+                    split_sentences="nonewlines",
+                    preserve_formatting=True ) # Corrected to a boolean value
+                return result.text
+            except Exception as e:
+                self.logger.error(f"Error using translation: {e}")
+                # TODO maybe send email?
+                self.auth_ok = False
+        return lines
 
 def walk_storms (dir) : 
     for file in dir.glob("*.txt"):
