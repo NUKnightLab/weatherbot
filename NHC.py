@@ -52,7 +52,7 @@ def get_tropical_bulletin(bulletin):
     for item in items :
         
         desc = item.find('description')
-        desc = desc.text
+        desc = desc.text.replace('<br />','')
         headers = desc.split("BULLETIN")[1].split("SUMMARY OF")[0]
         headers = headers.strip().split("\n")
         headers = [line for line in headers if line != '']
@@ -105,14 +105,14 @@ def get_tropical_bulletin(bulletin):
         
         warnings = desc.split("WATCHES AND WARNINGS", 1)[1].split("DISCUSSION AND OUTLOOK",1)[0]
         matches = re.findall(r'A ([\w\s]+) is in effect for\.\.\.', warnings)
-        if warnings.__contains__("There are no coastal watches or warnings in effect.") or len(matches) == 0:
+        if "There are no coastal watches or warnings in effect." in warnings or len(matches) == 0:
             signals["nowarning"] = True
             
             
-        if warnings.__contains__("CHANGES WITH THIS ADVISORY:"):
+        if "CHANGES WITH THIS ADVISORY:" in warnings:
             changes = desc.split("CHANGES WITH THIS ADVISORY:", 1)[1].split("SUMMARY OF WATCHES AND WARNINGS IN EFFECT:",1)[0]
             
-            if changes.__contains__("None") or not contains_area(changes, area):
+            if "None" in changes or not contains_area(changes, area):
                 signals["noupdate"] = True
                 
         
@@ -135,16 +135,17 @@ def get_tropical_bulletin(bulletin):
         data["events"] = []
         for match in matches: 
             try:
-                event = {}
-                event["type"] = match
-                event["places"] = []  
-                event["relevant"] = False
+                event = {
+                    'type': match,
+                    'places': [],
+                    'relevant': False
+                }
                 index = warnings.index("A " +match+ " is in effect for...") +1
                 #find all events and for each event places 
                 while index < len(warnings) and warnings[index] != '$':
                     place = warnings[index].replace("* ", "").strip()
-                    event["places"].append(translate(place))
-                    if place.casefold().__contains__("puerto rico"):
+                    if "puerto rico" in place.casefold():
+                        event["places"].append(translate(place))
                         event["relevant"] = True
 
                         
@@ -159,6 +160,8 @@ def get_tropical_bulletin(bulletin):
             if event["relevant"] == True :
                 data["practive"].append(event)
                 signals["practive"] = True
+            else:
+                logger.debug(f"event {event['type']} not deemed relevant")
 
         #hazards affecting land
         hazards = desc.split("HAZARDS AFFECTING LAND",1)[1].split("FORECASTER",1)[0]
@@ -177,7 +180,7 @@ def get_tropical_bulletin(bulletin):
                 sentence = sentence.strip().replace("\n", "")
                 location_amount = {}
     
-                if sentence.__contains__("...") :
+                if "..." in sentence:
                 
                         location = sentence.split("...")[0]
                         height = sentence.split("...")[1]
@@ -192,7 +195,7 @@ def get_tropical_bulletin(bulletin):
                                 location_amount["height"] = translate(height)
                             count += 1
                             rainlist.append(location_amount)
-                elif sentence.__contains__(":"):
+                elif ":" in sentence:
                     location = sentence.split(":")[0]
                     height = sentence.split(":")[1]
                     if contains_area(location, area):
@@ -219,7 +222,7 @@ def get_tropical_bulletin(bulletin):
         surgedata = re.search(surgepattern, hazards, re.DOTALL)
         
         if surgedata:
-            if surgedata.group(1).__contains__("..."):
+            if "..." in surgedata.group(1):
 
                 surgedata= surgedata.group(1).split("...", 1) [1]
                 patt= r'([A-Za-z\s.-]+)\.\.\.(\d+\s+to\s+\d+)\s+ft'
