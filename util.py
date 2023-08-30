@@ -14,7 +14,7 @@ logger = logging.getLogger('util')
 SMTP_SERVER = "email-smtp.us-east-2.amazonaws.com"
 SMTP_USERNAME = os.environ['SMTP_USERNAME']
 SMTP_PASSWORD = os.environ['SMTP_PASSWORD']
-SENDER_EMAIL = 'Automated Message Sender <knightlab@northwestern.edu>'
+SENDER_EMAIL = 'Weatherbot <knightlab@northwestern.edu>'
 
 def send_email(recipients, subject, body , url=None, actually_send_email=False):
     if recipients is not None:
