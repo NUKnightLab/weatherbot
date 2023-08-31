@@ -29,7 +29,7 @@ def fetch_nws_data():
         return None
 
 
-def get_weather_bulletin(bulletin):
+def get_weather_bulletin(bulletin) -> list:
     PARSED_ID_FILE = 'NWSdata.json'
     translate = Translator()
 
@@ -57,7 +57,7 @@ def get_weather_bulletin(bulletin):
 
         if bulletin['features'] == []:
             logger.debug("No weather alerts")
-            return {"data":None , "action":"pass"}
+            return []
 
         for feature in bulletin['features']:
             event = feature['properties']['event'].casefold()
