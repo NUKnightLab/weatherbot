@@ -1,6 +1,6 @@
 import json 
 from util import load_parsed_data, save_parsed_data, contains_area, Translator
-from jinja2 import Template
+from jinja2 import Template, Environment, FileSystemLoader
 from datetime import datetime
 import requests
 from bs4 import BeautifulSoup
@@ -173,7 +173,8 @@ def generate_nws_stories(bulletin) :
     for event in data:
 
         with open("templates/story_templates/NWS.html") as f :
-            template = Template(f.read())
+            template = Environment(loader=FileSystemLoader("templates/story_templates/")).from_string(f.read())
+            #Template(f.read())
             new_story = template.render(data=event)
             soup = BeautifulSoup(new_story, 'html.parser')
             p_tags= soup.find_all('p') # TODO this seems uncomfortably confident that no one will ever change the templates to use other than p tags. isn't there another way to get content out of a soup?

@@ -1,10 +1,3 @@
-<!DOCTYPE html>
-<html>
-<head>
-    
-</head>
-<body>
-  
     <p>El Servicio Nacional de Meteorología (SNM) ha emitido un {{data.event}} para Puerto Rico.
          El aviso publicado a las {{ data.effective }} se extiende hasta las {{ data.expires }} y {% if data.onearea%}afecta a la municipia {{ data.areas_affected}}.{% else %}afecta a las municipalidades de {{ data.areas_affected }}.{% endif %}
          La descripción del evento menciona lo siguiente: {% if data.what %} hey {{data.what}} {% elif data.hazard %} {{data.hazard}} {% endif %}
@@ -20,6 +13,5 @@
         Un {{data.event}} significa que el riesgo es inminente o está ocurriendo en la zona. 
         {% endif %}
      </p>
-        
-</body>
-</html>
+
+{% include "_credit.html" %}

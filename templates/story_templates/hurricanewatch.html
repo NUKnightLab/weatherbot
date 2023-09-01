@@ -1,11 +1,3 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Avisio Publico</title>
-</head>
-<body>
-    <h2>{{ data.headline }}</h2>
-   
     <p>El Centro Nacional de Huracanes (CNH) emitió un aviso de huracán para Puerto Rico
         ante el inminente paso de {{ data.stormname }} cerca o sobre la isla.
         El ciclón se encuentra a una distancia de {% for distance in data.distances %}
@@ -52,5 +44,5 @@
         {% if flags.tornadoes %}
         <p>Además, {{ data.tornadoes }}.</p>
         {% endif %}
-</body>
-</html>
+
+{% include "_credit.html" %}
