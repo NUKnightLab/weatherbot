@@ -23,7 +23,7 @@ from blox import make_cms_link, post_story
 from util import send_email, initialize_directory
 
 import logging
-from logging.handlers import TimedRotatingFileHandler
+from logging.handlers import RotatingFileHandler
 
 logger = logging.getLogger()
 
@@ -40,7 +40,7 @@ def configure_logging(logger):
     logfile_path = os.environ.get('LOGFILE')
     if logfile_path:
         # daily log files for one week
-        handler = TimedRotatingFileHandler(logfile_path, when='d', interval=1, backupCount=6)
+        handler = RotatingFileHandler(logfile_path, maxBytes=200000, backupCount=6)
         handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
         logger.addHandler(handler)
 
