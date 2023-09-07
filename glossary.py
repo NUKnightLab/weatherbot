@@ -7,7 +7,7 @@ import os
 import click
 import json
 
-TRANSLATOR = deepl.Translator(os.environ['DEEPL_API_KEY'])
+TRANSLATOR = deepl.Translator(os.environ['DEEPL_AUTH_KEY'])
 
 @click.group()
 def cli():

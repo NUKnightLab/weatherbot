@@ -108,7 +108,7 @@ class Translator(object):
                     target_lang="ES",
                     formality="prefer_more",
                     split_sentences="nonewlines",
-                    glossary="weatherbot",
+                    # glossary="weatherbot",
                     preserve_formatting=True ) # Corrected to a boolean value
                 return result.text
             except Exception as e:
