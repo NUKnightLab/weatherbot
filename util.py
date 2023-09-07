@@ -92,12 +92,12 @@ class Translator(object):
     translator = None
     logger = logging.getLogger('Translator')
     def __init__(self) -> None:
-        api_key = os.environ.get('DEEPL_API_KEY')
+        api_key = os.environ.get('DEEPL_AUTH_KEY')
         if api_key:
             self.translator = deepl.Translator(api_key)
             self.auth_ok = True
         else:
-            self.logger.warning("Missing DEEPL_API_KEY env variable. Translations will be a no-op")
+            self.logger.warning("Missing DEEPL_AUTH_KEY env variable. Translations will be a no-op")
 
     def __call__(self, lines: str) -> str:
         if self.translator and self.auth_ok:
@@ -108,6 +108,7 @@ class Translator(object):
                     target_lang="ES",
                     formality="prefer_more",
                     split_sentences="nonewlines",
+                    glossary="weatherbot",
                     preserve_formatting=True ) # Corrected to a boolean value
                 return result.text
             except Exception as e:
