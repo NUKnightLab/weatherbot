@@ -3,3 +3,4 @@ requests==2.29.0
 deepl==1.15.0
 lxml==4.9.3
 Jinja2==3.1.2
+click==8.1.7
