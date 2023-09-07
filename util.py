@@ -7,6 +7,7 @@ import json
 import os
 from smtplib import SMTP
 from email.message import EmailMessage
+import time
 
 import logging
 logger = logging.getLogger('util')
@@ -156,18 +157,23 @@ def get_headlines(txt_lines):
                 
     return headlines
 
+def is_too_old(file_path, age_in_seconds):
+    if age_in_seconds is None:
+        return False
+    return ( time.time() - os.path.getmtime(file_path) ) > age_in_seconds
 
-def initialize_directory(directory):
-    """given a path, make sure it's an empty directory. That is, create it if necessary, 
-    and clean out anything that might have been in it"""
-    # TODO: refactor cleanup into a separate method for readability
+def initialize_directory(directory, maxage=604800):
+    """given a path, make sure it's an empty directory. That is, create it if necessary. 
+    Then clean out any files older than maxage (in seconds). if maxage is None, no files will be deleted. 
+    if maxage is 0, all files will be deleted."""
     os.makedirs(directory, exist_ok=True)
     for file in os.listdir(directory):
         file_path = os.path.join(directory, file)
         try:
-            if os.path.isfile(file_path):
+            if os.path.isfile(file_path) and is_too_old(file_path, maxage):
                 os.unlink(file_path)
-            elif os.path.isdir(file_path):
-                shutil.rmtree(file_path)
+            # for now skip trying to figure out if directories are empty, it's no big deal to keep empty dirs around.
+            # elif os.path.isdir(file_path):
+            #     shutil.rmtree(file_path)
         except Exception as e:
             logging.warning("Error while deleting:", e)
