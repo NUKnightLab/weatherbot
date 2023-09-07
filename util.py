@@ -8,6 +8,7 @@ import os
 from smtplib import SMTP
 from email.message import EmailMessage
 import time
+from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 import logging
 logger = logging.getLogger('util')
@@ -16,6 +17,18 @@ SMTP_SERVER = "email-smtp.us-east-2.amazonaws.com"
 SMTP_USERNAME = os.environ['SMTP_USERNAME']
 SMTP_PASSWORD = os.environ['SMTP_PASSWORD']
 SENDER_EMAIL = 'Weatherbot <knightlab@northwestern.edu>'
+
+JINJA_ENVIRONMENT = Environment(
+    loader=FileSystemLoader('templates'),
+    autoescape=select_autoescape()
+)
+
+
+def render_template(path, **kwargs):
+    """Given a relative template path and any context for rendering the template,
+    do it all here, in one place. """
+    template = JINJA_ENVIRONMENT.get_template(path)
+    return template.render(**kwargs)
 
 def send_email(recipients, subject, body , url=None, actually_send_email=False):
     if recipients is not None:

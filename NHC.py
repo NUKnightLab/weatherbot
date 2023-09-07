@@ -1,7 +1,7 @@
 import re
 from bs4 import BeautifulSoup
 
-from util import Translator,load_parsed_data, save_parsed_data,contains_area
+from util import Translator,load_parsed_data, render_template, save_parsed_data,contains_area
 from jinja2 import Template
 
 import logging
@@ -315,26 +315,24 @@ def writeNHC(bulletin) -> dict:
         else:
             for event in results['data']["practive"]: 
                 eventtype= event["type"].replace(" ", "").lower()
-                with open("templates/story_templates/" + eventtype + ".html") as f:
-                    template = Template(f.read())
-                    new_story = template.render(data=results['data'], event=event, flags=results['flags'], signals=results['signals'])
-                    soup = BeautifulSoup(new_story, 'html.parser')
-                    p_tags= soup.find_all('p')
-                    
-                    new_story= [re.sub(r'\s+', ' ', p.get_text(strip=True)) for p in p_tags if p.get_text(strip=True)]
-                    with open("templates/email_templates/storypublished.html") as f:
-                        emailtemplate = Template(f.read())
-                        emailcontent = emailtemplate.render(data=results['data'], event=event, flags=results['flags'], signals=results['signals'])
-                        emailcontent= BeautifulSoup(emailcontent, 'html.parser').find_all('p')
-                        emailcontent= [re.sub(r'\s+', ' ', p.get_text(strip=True)) for p in emailcontent if p.get_text(strip=True)]
-                    new_story={
-                        "body": '\n'.join(new_story), 
-                        "headline": results['data']["headline"] , 
-                        "event": event["type"], 
-                        "email": '\n'.join(emailcontent),
-                        'image_code': IMAGE_CODES.get(eventtype)
-                    }
-                    generated_stories.append(new_story)
+                rendered = render_template(f"story_templates/{eventtype}.html", 
+                                            data=results['data'], 
+                                            event=event, 
+                                            flags=results['flags'], 
+                                            signals=results['signals'])
+                with open("templates/email_templates/storypublished.html") as f:
+                    emailtemplate = Template(f.read())
+                emailcontent = emailtemplate.render(data=results['data'], event=event, flags=results['flags'], signals=results['signals'])
+                emailcontent= BeautifulSoup(emailcontent, 'html.parser').find_all('p')
+                emailcontent= [re.sub(r'\s+', ' ', p.get_text(strip=True)) for p in emailcontent if p.get_text(strip=True)]
+                new_story={
+                    "body": rendered, 
+                    "headline": results['data']["headline"] , 
+                    "event": event["type"], 
+                    "email": '\n'.join(emailcontent),
+                    'image_code': IMAGE_CODES.get(eventtype)
+                }
+                generated_stories.append(new_story)
             return {
                 "content": generated_stories, 
                 "action":"post" 
