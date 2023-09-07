@@ -7,6 +7,8 @@ import json
 import os
 from smtplib import SMTP
 from email.message import EmailMessage
+import time
+from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 import logging
 logger = logging.getLogger('util')
@@ -15,6 +17,18 @@ SMTP_SERVER = "email-smtp.us-east-2.amazonaws.com"
 SMTP_USERNAME = os.environ['SMTP_USERNAME']
 SMTP_PASSWORD = os.environ['SMTP_PASSWORD']
 SENDER_EMAIL = 'Weatherbot <knightlab@northwestern.edu>'
+
+JINJA_ENVIRONMENT = Environment(
+    loader=FileSystemLoader('templates'),
+    autoescape=select_autoescape()
+)
+
+
+def render_template(path, **kwargs):
+    """Given a relative template path and any context for rendering the template,
+    do it all here, in one place. """
+    template = JINJA_ENVIRONMENT.get_template(path)
+    return template.render(**kwargs)
 
 def send_email(recipients, subject, body , url=None, actually_send_email=False):
     if recipients is not None:
@@ -156,18 +170,23 @@ def get_headlines(txt_lines):
                 
     return headlines
 
+def is_too_old(file_path, age_in_seconds):
+    if age_in_seconds is None:
+        return False
+    return ( time.time() - os.path.getmtime(file_path) ) > age_in_seconds
 
-def initialize_directory(directory):
-    """given a path, make sure it's an empty directory. That is, create it if necessary, 
-    and clean out anything that might have been in it"""
-    # TODO: refactor cleanup into a separate method for readability
+def initialize_directory(directory, maxage=604800):
+    """given a path, make sure it's an empty directory. That is, create it if necessary. 
+    Then clean out any files older than maxage (in seconds). if maxage is None, no files will be deleted. 
+    if maxage is 0, all files will be deleted."""
     os.makedirs(directory, exist_ok=True)
     for file in os.listdir(directory):
         file_path = os.path.join(directory, file)
         try:
-            if os.path.isfile(file_path):
+            if os.path.isfile(file_path) and is_too_old(file_path, maxage):
                 os.unlink(file_path)
-            elif os.path.isdir(file_path):
-                shutil.rmtree(file_path)
+            # for now skip trying to figure out if directories are empty, it's no big deal to keep empty dirs around.
+            # elif os.path.isdir(file_path):
+            #     shutil.rmtree(file_path)
         except Exception as e:
             logging.warning("Error while deleting:", e)
