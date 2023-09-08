@@ -29,7 +29,7 @@ def fetch_nws_data():
         return None
 
 
-def get_weather_bulletin(bulletin) -> list:
+def get_weather_bulletin(bulletin, test_mode) -> list:
     PARSED_ID_FILE = 'NWSdata.json'
     translate = Translator()
 
@@ -64,7 +64,7 @@ def get_weather_bulletin(bulletin) -> list:
             
             eventid=feature["id"]
  
-            if eventid in parsed_ids:
+            if eventid in parsed_ids and not test_mode:
                 logger.debug(f"Skipping '{event}' -- already processed. [id: {eventid}]")
                 continue
 
@@ -142,7 +142,7 @@ def get_weather_bulletin(bulletin) -> list:
           
             data.append(eventdict)
 
-        if type(parsed_ids) == dict:
+        if type(parsed_ids) == dict and not test_mode:
             save_parsed_data(parsed_ids, PARSED_ID_FILE)
         else:
             logger.warning(f"save_parsed_ids got non-dict, so not saving {parsed_ids}")
@@ -165,8 +165,8 @@ def format_list_strings(strings):
 # Given a bulletin from the NWS, see if stories should be written
 # for each event that needs a story, generate the content 
 # return a list of story content for dispatch elsewhere
-def generate_nws_stories(bulletin) :
-    data = get_weather_bulletin(bulletin)
+def generate_nws_stories(bulletin, test_mode=False) :
+    data = get_weather_bulletin(bulletin, test_mode)
 
     generated_stories=[]
 

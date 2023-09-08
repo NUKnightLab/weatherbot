@@ -11,7 +11,7 @@ def clean_str(str):
     str= re.sub(r'[^\w]', '', str).strip()
     return str
 
-def get_tropical_bulletin(bulletin):
+def get_tropical_bulletin(bulletin, test_mode):
     PARSED_ID_FILE = 'NHCdata.json'
 
     translate = Translator()
@@ -33,7 +33,7 @@ def get_tropical_bulletin(bulletin):
 
     items = soup.find_all('item')
     stormname = soup.find('title').text.strip()
-    if stormname in parsed_ids:
+    if stormname in parsed_ids and not test_mode:
         logger.debug(f"ID '{stormname}' has already been processed. Skipping...")
         signals["skip"] = True
         return results
@@ -270,13 +270,13 @@ def get_tropical_bulletin(bulletin):
                 data["tornadoes"] = tornadodata
             
 
-    
-    save_parsed_data(parsed_ids, PARSED_ID_FILE)
+    if not test_mode:
+        save_parsed_data(parsed_ids, PARSED_ID_FILE)
 
     return results
 
 # not sure how to mark type for bulletin which is a FLO (either StringIO or file opened by argparse)
-def writeNHC(bulletin) -> dict: 
+def writeNHC(bulletin, test_mode=False) -> dict: 
     """Given a file-like object representing an NHC XML file, parse it, analyze it,
     and return a dictionary. This dictionary may be empty, or it may have various keys
     which govern what should be done based on the bulletin's contents, including posting 
@@ -291,7 +291,7 @@ def writeNHC(bulletin) -> dict:
         'tropicalstormwatch': 'vigilancia_de_tormenta_tropical',
     }
 
-    results = get_tropical_bulletin(bulletin)
+    results = get_tropical_bulletin(bulletin, test_mode)
     if results['signals']['skip']:
         return {}
 

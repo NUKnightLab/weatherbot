@@ -56,9 +56,12 @@ def main_nws(testfile=None, actually_post_articles=False):
     nwsjson_directory = "bulletins/NWSjson"
     initialize_directory(nwsjson_directory)
 
+    test_mode = False
+
     if testfile:
         logger.debug(f"NWS using test file {testfile.name}")
         nws_json = json.load(testfile)
+        test_mode = True
     else:
         nws_json = fetch_nws_data()
 
@@ -69,7 +72,7 @@ def main_nws(testfile=None, actually_post_articles=False):
             json.dump(nws_json, file)
 
     # TODO: pass JSON instead of file
-    generated = generate_nws_stories(filelocation)
+    generated = generate_nws_stories(filelocation, test_mode=test_mode)
     if generated:
         with open("nws_generated.json", 'w') as f: # temporary
             json.dump(generated, f, indent=2)

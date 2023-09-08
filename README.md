@@ -136,13 +136,14 @@ You will need Python.
    ```sh
    pip install -r requirements.txt
    ```
-3. Get a free DeepL authentication Key at [https://www.deepl.com/api](https://www.deepl.com/api)
+3. If you want to take advantage of translation, get a free DeepL authentication Key at [https://www.deepl.com/api](https://www.deepl.com/api)
 
 4. Save your API key in your environment variables
     ```sh
       export "DEEPL_AUTH_KEY"=YOUR_KEY
     ```
 
+(Note that if you don't set up a DeepL authorization key, the system will still work; it simply won't try to translate text.)
     
   
  
