@@ -140,7 +140,7 @@ You will need Python.
 
 4. Save your API key in your environment variables
     ```sh
-      EXPORT "DEEPL_API_KEY"=YOUR_KEY
+      export "DEEPL_AUTH_KEY"=YOUR_KEY
     ```
 
     
