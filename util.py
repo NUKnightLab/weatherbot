@@ -91,25 +91,31 @@ class Translator(object):
     auth_ok = False
     translator = None
     logger = logging.getLogger('Translator')
+    glossary_id = None
     def __init__(self) -> None:
         api_key = os.environ.get('DEEPL_AUTH_KEY')
         if api_key:
             self.translator = deepl.Translator(api_key)
             self.auth_ok = True
+            self.glossary_id = os.environ.get('DEEPL_GLOSSARY_ID', None)
+
         else:
             self.logger.warning("Missing DEEPL_AUTH_KEY env variable. Translations will be a no-op")
 
     def __call__(self, lines: str) -> str:
         if self.translator and self.auth_ok:
             try:
-                result = self.translator.translate_text(
-                    lines,
-                    source_lang="EN",
-                    target_lang="ES",
-                    formality="prefer_more",
-                    split_sentences="nonewlines",
-                    glossary="b784fb6c-c373-44ef-957c-9dc8ee77e42b",
-                    preserve_formatting=True ) # Corrected to a boolean value
+                kwargs = {
+                    'source_lang': "EN",
+                    'target_lang': "ES",
+                    'formality': "prefer_more",
+                    'split_sentences': "nonewlines",
+                    'preserve_formatting': True
+                }
+                if self.glossary_id:
+                    kwargs['glossary'] = self.glossary_id
+
+                result = self.translator.translate_text(lines, **kwargs)
                 return result.text
             except Exception as e:
                 self.logger.error(f"Error using translation: {e}")
