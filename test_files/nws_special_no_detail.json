@@ -1,0 +1,118 @@
+{
+  "@context": [
+    "https://geojson.org/geojson-ld/geojson-context.jsonld",
+    {
+      "@version": "1.1",
+      "wx": "https://api.weather.gov/ontology#",
+      "@vocab": "https://api.weather.gov/ontology#"
+    }
+  ],
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.731c9250257ec3e16aab140ece2f105ad5c9f48a.001.1",
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-66.9599999, 17.94],
+            [-66.99, 17.970000000000002],
+            [-67, 17.96],
+            [-67.01, 17.970000000000002],
+            [-67.14, 17.96],
+            [-67.13, 18.16],
+            [-66.69999999999999, 18.22],
+            [-66.58999999999999, 18],
+            [-66.69999999999999, 17.98],
+            [-66.74999999999999, 17.98],
+            [-66.76999999999998, 18.01],
+            [-66.79999999999998, 17.970000000000002],
+            [-66.83999999999999, 17.950000000000003],
+            [-66.89999999999999, 17.950000000000003],
+            [-66.91999999999999, 17.970000000000002],
+            [-66.90999999999998, 17.950000000000003],
+            [-66.92999999999998, 17.94],
+            [-66.91999999999997, 17.93],
+            [-66.9599999, 17.94]
+          ]
+        ]
+      },
+      "properties": {
+        "@id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.731c9250257ec3e16aab140ece2f105ad5c9f48a.001.1",
+        "@type": "wx:Alert",
+        "id": "urn:oid:2.49.0.1.840.0.731c9250257ec3e16aab140ece2f105ad5c9f48a.001.1",
+        "areaDesc": "Ponce and Vicinity; Western Interior; Mayaguez and Vicinity; Southwest",
+        "geocode": {
+          "SAME": [
+            "072059",
+            "072075",
+            "072111",
+            "072113",
+            "072133",
+            "072153",
+            "072001",
+            "072081",
+            "072083",
+            "072093",
+            "072121",
+            "072131",
+            "072141",
+            "072003",
+            "072011",
+            "072067",
+            "072097",
+            "072099",
+            "072117",
+            "072125",
+            "072023",
+            "072055",
+            "072079"
+          ],
+          "UGC": ["PRZ007", "PRZ009", "PRZ010", "PRZ011"]
+        },
+        "affectedZones": [
+          "https://api.weather.gov/zones/forecast/PRZ007",
+          "https://api.weather.gov/zones/forecast/PRZ009",
+          "https://api.weather.gov/zones/forecast/PRZ010",
+          "https://api.weather.gov/zones/forecast/PRZ011"
+        ],
+        "references": [],
+        "sent": "2023-09-08T15:50:00-04:00",
+        "effective": "2023-09-08T15:50:00-04:00",
+        "onset": "2023-09-08T15:50:00-04:00",
+        "expires": "2023-09-08T16:45:00-04:00",
+        "ends": null,
+        "status": "Actual",
+        "messageType": "Alert",
+        "category": "Met",
+        "severity": "Moderate",
+        "certainty": "Observed",
+        "urgency": "Expected",
+        "event": "Special Weather Statement",
+        "sender": "w-nws.webmaster@noaa.gov",
+        "senderName": "NWS San Juan PR",
+        "headline": "Special Weather Statement issued September 8 at 3:50PM AST by NWS San Juan PR",
+        "description": "At 349 PM AST, a strong thunderstorm was near Penuelas, moving west\nat 15 mph.\n\nHAZARD...Up to 50 mph wind, frequent cloud to ground lightning and\nheavy rain.\n\nSOURCE...Radar indicated.\n\nIMPACT...Expect minor damage to tree limbs and blowing around of\nlight, unsecured objects. Heavy rain may cause temporary\nstreet flooding especially in poor drainage areas.",
+        "instruction": "People outdoors should seek shelter immediately. If you can hear\nthunder, you are close enough to be struck by lightning. Motorists\nshould slow down and be prepared for possible loss of control due to\nhydroplaning.",
+        "response": "Execute",
+        "parameters": {
+          "AWIPSidentifier": ["SPSSJU"],
+          "WMOidentifier": ["WWCA82 TJSJ 081950"],
+          "NWSheadline": [
+            "A strong thunderstorm will impact portions of southwestern Puerto Rico from Ponce to Sabana Grande through 445 PM AST"
+          ],
+          "eventMotionDescription": [
+            "2023-09-08T19:49:00-00:00...storm...081DEG...27KT...18.09,-66.86"
+          ],
+          "maxWindGust": ["40 MPH"],
+          "maxHailSize": ["0.00"],
+          "BLOCKCHANNEL": ["EAS", "NWEM", "CMAS"],
+          "EAS-ORG": ["WXR"]
+        }
+      }
+    }
+  ],
+  "title": "Current watches, warnings, and advisories for Puerto Rico",
+  "updated": "2023-09-08T20:15:00+00:00"
+}
