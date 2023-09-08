@@ -106,9 +106,12 @@ def main_nhc(testfile=None, actually_send_email=False, actually_post_articles=Fa
 
     results = []
 
+    test_mode = False
+
     if testfile:
+        test_mode = True
         try:
-            results.append(writeNHC(testfile))
+            results.append(writeNHC(testfile, test_mode))
         except ValueError as e: # we don't need stack trace for this. This seems overly complex tho, should be able to trap better
             logger.error(f"Error processing bulletin {testfile} {e}")
         except Exception as e:
