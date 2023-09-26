@@ -1,5 +1,5 @@
 import json 
-from util import load_parsed_data, render_template, save_parsed_data, contains_area, Translator
+from util import load_parsed_data, render_template, save_parsed_data, contains_area, Translator,convert_time
 from jinja2 import Template, Environment, FileSystemLoader
 from datetime import datetime
 import requests
@@ -98,15 +98,9 @@ def get_weather_bulletin(bulletin, test_mode) -> list:
                 eventdict['onearea'] = True
             #print('areas affected', eventdict['areas_affected'])
             #print('Areas affected:', eventdict['areas_affected'])
-            eventdict['sent'] = feature['properties']['sent']
-            time_format = '%Y-%m-%dT%H:%M:%S%z'
-
-            effective = feature['properties']['effective']
-            time_obj = datetime.strptime(effective, time_format)
-            eventdict['effective'] = time_obj.strftime(('%I:%M %p')) + " AST" 
-            expire = feature['properties']['expires']
-            time_obj = datetime.strptime(expire, time_format)
-            eventdict['expires'] = time_obj.strftime(('%I:%M %p')) + " AST" 
+            eventdict['sent'] =convert_time(feature['properties']['sent'] , format="NWS")
+            eventdict['effective'] = convert_time(feature['properties']['effective'] , format="NWS")
+            eventdict['expires'] = convert_time(feature['properties']['expires'] , format="NWS")
             
             description = feature['properties']['description']
             #print('Headline:', headline)

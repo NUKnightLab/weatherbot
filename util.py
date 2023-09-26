@@ -10,6 +10,7 @@ from email.message import EmailMessage
 import time
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
+from datetime import datetime, timedelta
 import logging
 logger = logging.getLogger('util')
 
@@ -191,3 +192,42 @@ def initialize_directory(directory, maxage=604800):
             #     shutil.rmtree(file_path)
         except Exception as e:
             logging.warning("Error while deleting:", e)
+
+def convert_time(date_string, format):
+    try:
+        if format == "NHC":
+            # Parse the input date string in "pubDate" format , NHC time is in GMT
+            date_obj = datetime.strptime(date_string, "%a, %d %b %Y %H:%M:%S %z")
+            gmt_minus_4 = timedelta(hours=4)
+            date_gmt_minus_4 = date_obj - gmt_minus_4    
+        elif format == "NWS":
+            # Parse the input date string in "effective" format , NWs time is usually already in GMT-4
+            date_obj = datetime.strptime(date_string, "%Y-%m-%dT%H:%M:%S%z")
+            date_gmt_minus_4 = date_obj
+        else:
+            logger.error("Invalid format_flag")
+
+        # Round minutes and seconds to the nearest hour
+        if date_gmt_minus_4.minute >= 30:
+            date_gmt_minus_4 = date_gmt_minus_4.replace(minute=0, second=0) + timedelta(hours=1)
+        else:
+            date_gmt_minus_4 = date_gmt_minus_4.replace(minute=0, second=0)
+
+        # Format the time in 12-hour format with AM/PM
+        formatted_time_string = date_gmt_minus_4.strftime("%I:%M %p")
+
+        return formatted_time_string
+    except ValueError:
+        logger.error("Invalid date string format")
+        return date_string
+
+
+# # Example usage:
+# date_string1 = "Mon, 28 Aug 2023 14:59:27 +0000"
+# date_string2 = "2023-09-08T15:50:00-04:00"
+
+# formatted_time1 = convert_time(date_string1, format="NHC")
+# formatted_time2 = convert_time(date_string2, format="NWS")
+
+# print(formatted_time1)
+# print(formatted_time2)
