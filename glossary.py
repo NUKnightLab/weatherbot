@@ -14,6 +14,11 @@ def cli():
     pass
 
 @cli.command()
+@click.argument('input', type=click.File('rb'))
+def translate():
+
+
+@cli.command()
 def list():
     g = TRANSLATOR.list_glossaries()
     if g:
