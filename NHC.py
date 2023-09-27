@@ -1,8 +1,9 @@
 import re
 from bs4 import BeautifulSoup
 
-from util import Translator,load_parsed_data, render_template, save_parsed_data,contains_area
+from util import Translator,load_parsed_data, render_template, save_parsed_data,contains_area, convert_time
 from jinja2 import Template
+
 
 import logging
 logger = logging.getLogger('NHC')
@@ -40,12 +41,14 @@ def get_tropical_bulletin(bulletin, test_mode):
     else:
         logger.debug(f"Processing ID '{stormname}'...")
         parsed_ids[stormname] = True
+
+    time_published = soup.find('pubDate').text.strip()
+    data["published"] = convert_time(time_published , format = "NHC")
     name_pattern= r'\b([A-Za-z]+) (?:Intermediate|Advisory)'
     name_match = re.search(name_pattern, stormname)
     data["stormname"] = name_match.group(1)
-
-    
     data["event"] = stormname
+
     
 
     
@@ -57,7 +60,6 @@ def get_tropical_bulletin(bulletin, test_mode):
         headers = headers.strip().split("\n")
         headers = [line for line in headers if line != '']
         #TIME OF BULLETIN   
-        data["published"]= " ".join(headers[2].split(" ")[0:4]).strip()
         headline = "/e".join(headers[3:])
         headline= headline.replace("...","").strip()
         headline= headline.replace("/e"," ")
