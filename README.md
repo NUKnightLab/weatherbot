@@ -82,7 +82,7 @@
 ## About The Project
 Weather Bot is an automation tool designed to fetch data from the National Hurricane Center and the National Weather Service, identify relevant weather alerts and warnings, and publish weather reports. 
 
-This project was originally built for El Vocero de Puerto Rico in San Juan, Puerto Rico. The Associated Press (AP) and the Knight Lab at Northwestern University collaborated to develop this application as part of the Local News AI Initiative, funded by the [John S. and James L. Knight Foundation](https://knightfoundation.org/articles/ai-for-local-news-advancing-business-sustainability-in-newsrooms/), which aims to leverage AI for the benefit of local news.
+This project was originally built for El Vocero de Puerto Rico in San Juan, Puerto Rico. The Associated Press and the Knight Lab at Northwestern University collaborated to develop this application as part of the Local News AI Initiative, funded by the [John S. and James L. Knight Foundation](https://knightfoundation.org/articles/ai-for-local-news-advancing-business-sustainability-in-newsrooms/), which aims to leverage AI for the benefit of local news.
 
 The development team thanks the staff at [El Vocero de Puerto Rico](https://www.elvocero.com/) for proposing this project, and for their participation, feedback, and encouragement.
 
@@ -173,7 +173,7 @@ Project Link: [https://github.com/NUKnightLab/weatherbot](https://github.com/NUK
 ### Original Developers
 
 * Mame Coumba Ka - [@coumbaK](https://github.com/coumbaK) - Northwestern University
-* Maria Aragon - Northwestern University
+* Maria Ximena Aragon - Northwestern University
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
