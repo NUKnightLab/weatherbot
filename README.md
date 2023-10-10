@@ -30,8 +30,8 @@
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <a href="https://github.com/github_username/repo_name">
-    <img src="images/logo.png" alt="Logo" width="80" height="80">
+  <a href="https://github.com/associatedpress/">
+    <img src="https://www.ap.org/assets/images/ap.svg" alt="AP Logo" width="75" height="88">
   </a>
 
 <h3 align="center">Weather Bot</h3>
@@ -59,6 +59,8 @@
     <li>
       <a href="#about-the-project">About The Project</a>
       <ul>
+        <li><a href="#project-objectives">Project Objectives</a></li>
+        <li><a href="#how-it-operates">How It Operates</a></li>
         <li><a href="#built-with">Built With</a></li>
       </ul>
     </li>
@@ -69,12 +71,8 @@
         <li><a href="#installation">Installation</a></li>
       </ul>
     </li>
-    <li><a href="#usage">Usage</a></li>
-    <li><a href="#roadmap">Roadmap</a></li>
-    <li><a href="#contributing">Contributing</a></li>
     <li><a href="#license">License</a></li>
     <li><a href="#contact">Contact</a></li>
-    <li><a href="#acknowledgments">Acknowledgments</a></li>
   </ol>
 </details>
 
@@ -82,9 +80,12 @@
 
 <!-- ABOUT THE PROJECT -->
 ## About The Project
-Weather Bot is an automation tool designed to fetch data from the National Hurricane Center and the National Weather Service, identify relevant weather alerts and warnings, and publish weather reports on El Vocero platforms.
+Weather Bot is an automation tool designed to fetch data from the National Hurricane Center and the National Weather Service, identify relevant weather alerts and warnings, and publish weather reports. 
 
-This project is a collaboration between the Associated Press (AP) and the Knight Lab at Northwestern University. It's part of the Local AI Initiative, funded by the Knight Foundation, which aims to leverage AI for the benefit of local news.
+This project was originally built for El Vocero de Puerto Rico in San Juan, Puerto Rico. The Associated Press (AP) and the Knight Lab at Northwestern University collaborated to develop this application as part of the Local News AI Initiative, funded by the [John S. and James L. Knight Foundation](https://knightfoundation.org/articles/ai-for-local-news-advancing-business-sustainability-in-newsrooms/), which aims to leverage AI for the benefit of local news.
+
+The development team thanks the staff at [El Vocero de Puerto Rico](https://www.elvocero.com/) for proposing this project, and for their participation, feedback, and encouragement.
+
 ### Project Objectives
 
 - **Timely Information:** Ensuring that weather alerts are delivered promptly to keep the community well-informed about potential risks in critical times.
@@ -145,27 +146,12 @@ You will need Python.
 
 (Note that if you don't set up a DeepL authorization key, the system will still work; it simply won't try to translate text.)
     
-  
- 
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
-
-<!-- USAGE EXAMPLES -->
-## Usage
-
-Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources.
-
-_For more examples, please refer to the [Documentation](https://example.com)_
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
-
+<!-- LICENSE -->
+## License
 
 Distributed under the GNU GENERAL PUBLIC LICENSE. See `LICENSE` for more information.
 
@@ -176,25 +162,20 @@ Distributed under the GNU GENERAL PUBLIC LICENSE. See `LICENSE` for more informa
 <!-- CONTACT -->
 ## Contact
 
-Joe Germuska - [@JoeGermuska](https://github.com/JoeGermuska) - JoeGermuska@northwestern.edu
+*The Associated Press does not provide technical support for this open-source application.*
 
-Mame Coumba Ka - [@coumbaK](https://github.com/coumbaK) - mameka2024@u.northwestern.edu
+Joe Germuska - [@JoeGermuska](https://github.com/JoeGermuska) - JoeGermuska@northwestern.edu
 
 Project Link: [https://github.com/NUKnightLab/weatherbot](https://github.com/NUKnightLab/weatherbot)
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+<!-- ORIGINAL DEVELOPERS -->
+### Original Developers
 
-
-<!-- ACKNOWLEDGMENTS -->
-## Acknowledgments
-
-* []()
-* []()
-* []()
+* Mame Coumba Ka - [@coumbaK](https://github.com/coumbaK) - Northwestern University
+* Maria Aragon - Northwestern University
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-
 
 
 <!-- MARKDOWN LINKS & IMAGES -->
