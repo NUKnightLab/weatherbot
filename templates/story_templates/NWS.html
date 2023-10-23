@@ -1,5 +1,5 @@
     <p>El Servicio Nacional de Meteorología (SNM) ha emitido un {{data.event}} para Puerto Rico.
-         El aviso publicado a las {{ data.effective }} se extiende hasta las {{ data.expires }} y {% if data.onearea%}afecta al municipio {{ data.areas_affected}}.{% else %}afecta a los muncipios de {{ data.areas_affected }}.{% endif %}
+         El aviso publicado a las {{ data.effective }} se extiende hasta las {{ data.expires }} y {% if data.onearea%}afecta al municipio {{ data.areas_affected}}.{% else %}afecta a los municipios de {{ data.areas_affected }}.{% endif %}
          La descripción del evento menciona lo siguiente: {% if data.what %} {{data.what}} {% elif data.hazard %} {{data.hazard}} {% endif %}
     </p>
     <p>
