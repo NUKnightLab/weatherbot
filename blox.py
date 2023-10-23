@@ -128,7 +128,8 @@ def post_image(image_code):
         logger.warning(f"Failed to post image [{image_code}] response code [{resp.status_code}]")
         return None
 
-if __name__ == '__main__':
+
+def post_test_story():
     content = """
 <p>Qui laborum minim nisi aliquip dolore dolore cillum dolore. Quis do consequat cillum ea dolore sint. Labore officia magna voluptate minim velit id cupidatat in minim dolore irure. Aliquip dolore excepteur culpa anim sunt nostrud commodo commodo consequat nisi incididunt nostrud tempor.</p>
 <p>Exercitation elit cupidatat ea nostrud non dolore amet ex enim id. Non duis ullamco deserunt officia aliquip enim non cupidatat qui. Duis ad commodo non magna enim laborum ad sunt mollit. Excepteur sunt laboris et minim voluptate aliquip irure eiusmod non ipsum nulla. Voluptate excepteur incididunt eu fugiat est dolore laborum. Ea irure laboris cillum reprehenderit labore ad nulla irure velit ipsum deserunt esse dolor Lorem. Aliquip aliqua ut esse deserunt adipisicing cupidatat ut tempor ex dolore.</p>
@@ -137,3 +138,25 @@ if __name__ == '__main__':
 """
     now = datetime.now()
     response = post_story(f"{now.isoformat()} Test story", content, 'aviso_de_huracan')
+    return response 
+
+def search(query="weather"):
+    # https://www.elvocero.com/tncms/webservice/#operation/editorial_search
+    url = f"{WS_ROOT}editorial/search"
+
+    data = {
+        'q': query,
+        'l': 100,
+        'o': 0, # eventually we'll want to paginate with l (length) and o (offset)
+        'admin': True
+    }
+
+    resp = requests.get(url, data=data)
+    if resp.ok:
+        print(resp.text)
+    else:
+        print(f"Error {resp.status_code}")
+
+
+if __name__ == '__main__':
+    search()
