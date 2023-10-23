@@ -1,5 +1,5 @@
 import json 
-from util import load_parsed_data, render_template, save_parsed_data, contains_area, Translator,convert_time
+from util import load_parsed_data, render_template, save_parsed_data, contains_area, Translator,convert_time, headline_to_gmt_minus_4
 from jinja2 import Template, Environment, FileSystemLoader
 from datetime import datetime
 import requests
@@ -84,7 +84,7 @@ def get_weather_bulletin(bulletin, test_mode) -> list:
             eventdict['references'] = refs
 
             #print(refs)
-            eventdict['headline'] = translate(feature['properties']['headline'])
+            
             areas = feature['properties']['areaDesc'].split(";")
             
             for i in range(len(areas)):
@@ -101,7 +101,8 @@ def get_weather_bulletin(bulletin, test_mode) -> list:
             eventdict['sent'] =convert_time(feature['properties']['sent'] , format="NWS")
             eventdict['effective'] = convert_time(feature['properties']['effective'] , format="NWS")
             eventdict['expires'] = convert_time(feature['properties']['expires'] , format="NWS")
-            
+            headline =headline_to_gmt_minus_4(feature['properties']['headline'], eventdict['effective'], eventdict['expires'])
+            eventdict['headline'] = translate(headline)
             description = feature['properties']['description']
             #print('Headline:', headline)
             eventdict['description'] = translate(description)
