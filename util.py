@@ -202,16 +202,15 @@ def initialize_directory(directory, maxage=604800):
 def convert_time(date_string, format):
     try:
         if format == "NHC":
-            # Parse the input date string in "pubDate" format , NHC time is in GMT
             date_obj = datetime.strptime(date_string, "%a, %d %b %Y %H:%M:%S %z")
             gmt_minus_4 = timedelta(hours=4)
-            date_gmt_minus_4 = date_obj - gmt_minus_4    
+            date_gmt_minus_4 = date_obj - gmt_minus_4
         elif format == "NWS":
-            # Parse the input date string in "effective" format , NWs time is usually already in GMT-4
             date_obj = datetime.strptime(date_string, "%Y-%m-%dT%H:%M:%S%z")
             date_gmt_minus_4 = date_obj
         else:
             logger.error("Invalid format_flag")
+            return date_string
 
         # Round minutes and seconds to the nearest hour
         if date_gmt_minus_4.minute >= 30:
@@ -222,12 +221,25 @@ def convert_time(date_string, format):
         # Format the time in 12-hour format with AM/PM
         formatted_time_string = date_gmt_minus_4.strftime("%I:%M %p")
 
-        return formatted_time_string
+        # Format the date in the "Month day" format
+        formatted_date_string = date_gmt_minus_4.strftime("%B %d")
+
+        return f"{formatted_date_string} at {formatted_time_string}"
     except ValueError:
         logger.error("Invalid date string format")
         return date_string
-
-
+def headline_to_gmt_minus_4(headline,published,expires):
+    date_time_pattern = r"(\w+\s+\d+ at \d+:\d+\w{2}) ([A-Z]+)"
+    issued = ""
+    until = ""
+    matches = re.findall(date_time_pattern, headline)
+    for i in range(len(matches)):
+        if i == 0:
+            issued = matches[i][0]+ " " + matches[i][1]
+        else :
+            until = matches[i][0]+ " " + matches[i][1]
+    new_headline = headline.replace("issued " + issued, "issued " + published).replace("until " + until, "until " + expires)
+    return new_headline
 # # Example usage:
 # date_string1 = "Mon, 28 Aug 2023 14:59:27 +0000"
 # date_string2 = "2023-09-08T15:50:00-04:00"
