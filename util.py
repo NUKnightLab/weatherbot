@@ -15,8 +15,6 @@ import logging
 logger = logging.getLogger('util')
 
 SMTP_SERVER = "email-smtp.us-east-2.amazonaws.com"
-SMTP_USERNAME = os.environ['SMTP_USERNAME']
-SMTP_PASSWORD = os.environ['SMTP_PASSWORD']
 SENDER_EMAIL = 'Weatherbot <knightlab@northwestern.edu>'
 
 JINJA_ENVIRONMENT = Environment(
@@ -32,6 +30,15 @@ def render_template(path, **kwargs):
     return template.render(**kwargs)
 
 def send_email(recipients, subject, body , url=None, actually_send_email=False):
+    try:
+        SMTP_USERNAME = os.environ['SMTP_USERNAME']
+        SMTP_PASSWORD = os.environ['SMTP_PASSWORD']
+    except KeyError:
+        if actually_send_email:
+            logger.warn("Email configuration error: SMTP_USERNAME and SMTP_PASSWORD must be set as environment variables. Email will not be sent.")
+        actually_send_email = False        
+
+
     if recipients is not None:
         msg = EmailMessage()
         msg['From'] = SENDER_EMAIL

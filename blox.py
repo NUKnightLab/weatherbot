@@ -7,8 +7,13 @@ from pathlib import Path
 import logging
 logger = logging.getLogger('blox')
 
-AUTH_USER = os.environ['AUTH_USER']
-AUTH_SECRET = os.environ['AUTH_SECRET']
+AUTH_OK = False
+try:
+    AUTH_USER = os.environ['AUTH_USER']
+    AUTH_SECRET = os.environ['AUTH_SECRET']
+    AUTH_OK = True
+except KeyError:
+    logger.warn("CMS API configuration error. AUTH_USER and AUTH_SECRET must be set as environment variables. Articles will not be posted.")
 
 WS_ROOT = 'https://www.elvocero.com/tncms/webservice/v1/'
 
@@ -35,6 +40,10 @@ def post_story(headline, content, image_code=None, actually_post_articles=False)
 
     if not actually_post_articles:
         logger.info("Post article flag not set. Details at debug level.")
+    elif not AUTH_OK:
+        logger.info("CMS authorization improperly configured. Articles will not be posted. Article details logged at debug level")
+        actually_post_articles = False
+
         
 
     now = datetime.now()
@@ -63,7 +72,8 @@ def post_story(headline, content, image_code=None, actually_post_articles=False)
                 'app': 'editorial'
             }]
         else:
-            logger.debug(f"would have posted image code: {image_code}")
+            preview_image_path = get_image(image_code)
+            logger.debug(f"would have posted image code: {image_code} {preview_image_path}")
 
     files = {
         'metadata': ('story.json', json.dumps(data), 'application/json')
@@ -140,23 +150,76 @@ def post_test_story():
     response = post_story(f"{now.isoformat()} Test story", content, 'aviso_de_huracan')
     return response 
 
-def search(query="weather"):
-    # https://www.elvocero.com/tncms/webservice/#operation/editorial_search
+# https://www.elvocero.com/tncms/webservice/#operation/editorial_search
+def search(q='Knight Lab'): 
+    """Was maybe going to be a generalized search, but we don't need that so i tuned it to what i needed"""
     url = f"{WS_ROOT}editorial/search"
-
-    data = {
-        'q': query,
+    headers = {'Content-Type': 'application/x-www-form-urlencoded'}
+    query = {
+        'q': q,
+        'admin': True,
         'l': 100,
-        'o': 0, # eventually we'll want to paginate with l (length) and o (offset)
-        'admin': True
+        'o': 0
     }
+    items = []
+    keep_going = True
+    try:
+        while(keep_going):
+            resp = requests.post(url, auth=(AUTH_USER,AUTH_SECRET), headers=headers, data=query)
+            if not resp.ok:
+                break
+            data = resp.json()
+            data['limit'] = int(data['limit'])
+            data['offset'] = int(data['offset'])
+            for item in data['items']:
+                if item['type'] == 'image':
+                    if "Weatherbot" in item['title']:
+                        items.append(item)
+                    else:
+                        print(f"Skipping likely foreign image f{item['title']} [{item['id']}]")
+                elif item['type'] == 'article':
+                    if item['start_time'].startswith('2123'):
+                        items.append(item)
+                    else:
+                        print(f"Skipping live article {item['title']} [{item['id']}]")
+                else:
+                    print(f"Skipping other type {item['type']} {item['title']} [{item['id']}]")
+            if data['offset'] + data['limit'] > data['total']: break
+            query['o'] = query['o'] + data['limit']
+    except Exception as e:
+        import pdb; pdb.set_trace()
+    return items        
 
-    resp = requests.get(url, data=data)
+def get(id):
+    url = f"{WS_ROOT}editorial/get"
+    headers = {'Content-Type': 'application/x-www-form-urlencoded'}
+    query = {
+        'id': id
+    }
+    resp = requests.post(url, auth=(AUTH_USER,AUTH_SECRET), headers=headers, data=query)
+
     if resp.ok:
-        print(resp.text)
-    else:
-        print(f"Error {resp.status_code}")
+        return resp.json()
+    raise Exception(f"Nothing returned for {id}")
 
+def review():
+    items = [i for i in json.load(open('search.json')) if i['type'] == 'article']
+    os.makedirs('review', exist_ok=True)
+    ok = missing = 0
+    for i in items:
+        detail = get(i['id'])
+        if detail['relationships']['child']:
+            ok = ok + 1
+        else:
+            json.dump(detail,open(f"{i['id']}.json",'w'), indent=2)
+            missing = missing + 1
+    print("done")
+    print(f"ok: {ok}")
+    print(f"missing: {missing}")
+    print(f"total: {len(items)}")
 
 if __name__ == '__main__':
-    search()
+    # items = search()
+    # json.dump(items,open('search.json', 'w'), indent=2)
+    # print(f"dumped {len(items)} to search.json")
+    review()

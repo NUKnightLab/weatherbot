@@ -5,6 +5,7 @@ NWSdata.json
 nws_generated.json
 *.code-workspace
 weatherbot.log*
+review/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

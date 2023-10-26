@@ -122,11 +122,21 @@ To get a local copy up and running follow these simple example steps.
 
 ### Prerequisites
 
-You will need Python.
-* Python Version
-  ```sh
-  Python 3.9.12
-  ```
+`weatherbot` is developed based on Python. The earliest python version it has been tested with is `3.8.10`
+
+Basic software dependencies are listed in `requirements.txt` and are readily installed from PyPi.
+
+As written, the system depends on three external systems, not including the NWS and NHC feeds:
+* Email: the code uses the python standard library to send mail via `SMTP`. Assuming you have access to one, you can simply define the following environment variables, and email sending should work. If necessary variables are not set, the system will log information about the email it would have sent.
+  * SMTP_SERVER
+  * SMTP_USERNAME
+  * SMTP_PASSWORD
+  * SENDER_EMAIL
+
+* Posting to Content Management System: the code is tightly coupled to the Blox CMS used by El Vocero. If your organization uses Blox, you probably need to get IP addresses whitelisted; you'll need to edit `blox.py` to change `WS_ROOT` to your organizations API endpoint; and, you'll need to set the environment variables listed below. If the variables are not set, the system will log information about the CMS actions it would have taken.
+  * AUTH_USER
+  * AUTH_SECRET
+* Translation: NWS and NHC bulletins are issued in English. The code is set up to automatically translate text to Spanish, using [DeepL](https://www.deepl.com). To use the translation, you must establish a DeepL account, generate an authentication key, and set it as the value of an environment variable, `DEEPL_AUTH_KEY`. If the environment variable is not set, the system will simply not translate text.
 
 ### Installation
 1. Clone the repo
@@ -137,15 +147,26 @@ You will need Python.
    ```sh
    pip install -r requirements.txt
    ```
-3. If you want to take advantage of translation, get a free DeepL authentication Key at [https://www.deepl.com/api](https://www.deepl.com/api)
+3. Test the code
+  ```sh
+  python main.py --nws test_files/nws_rip_current.json
+  ```
 
-4. Save your API key in your environment variables
-    ```sh
-      export "DEEPL_AUTH_KEY"=YOUR_KEY
-    ```
+### Testing
+Testing the application was challenging, because there are not good archives of bulletins. We've begun developing some testing processes. A handful of test files are in the repository in the `test_files` directory. You can collect others from current data provided from the NWS and NHC.
 
-(Note that if you don't set up a DeepL authorization key, the system will still work; it simply won't try to translate text.)
-    
+To run a test, specify the path to an NWS JSON file, an NHC XML file, or both. If you only specify one, the other code path will be ignored. (That is, it won't go out to get live data.) You may want to adjust logging configuration, currently in `main.py`. (In the future, logging configuration should probably be externalized to a configuration file.)
+
+Example test commands:
+  ```sh
+  python main.py --nws test_files/nws_rip_current.json
+  python main.py --nhc test_files/nhc_franklin_tropical_storm_watch.xml
+  ```
+
+
+
+
+
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
