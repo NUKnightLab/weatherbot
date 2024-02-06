@@ -202,6 +202,22 @@ def get(id):
         return resp.json()
     raise Exception(f"Nothing returned for {id}")
 
+def delete(id, comment=None): # this just doesn't work. it errors 404 for IDs other than what get passed in!
+    url = f"{WS_ROOT}editorial/delete_asset"
+    headers = {'Content-Type': 'application/x-www-form-urlencoded'}
+    query = {
+        'id': id,
+        'user': 'joegermuska@northwestern.edu'
+    }
+    if comment:
+        query['comment'] = comment
+    resp = requests.post(url, auth=(AUTH_USER,AUTH_SECRET), headers=headers, data=query)
+    if not resp.ok:
+        print(f"[{resp.status_code}] error deleting {id}")
+        print(resp.text)
+    return resp.status_code
+    
+
 def review():
     items = [i for i in json.load(open('search.json')) if i['type'] == 'article']
     os.makedirs('review', exist_ok=True)
@@ -222,4 +238,5 @@ if __name__ == '__main__':
     # items = search()
     # json.dump(items,open('search.json', 'w'), indent=2)
     # print(f"dumped {len(items)} to search.json")
-    review()
+    # review()
+    pass 
