@@ -55,9 +55,9 @@ def post_story(headline, content, image_code=None, actually_post_articles=False)
         'title': headline,
         'byline': 'Redaccion El Vocero',
         'content': content,
-        'start_time': start_time.isoformat(), # i
+        'start_time': start_time.isoformat(), 
         'keywords': ['weatheralert'], # do they want anything here?
-        'sections': ['weather'],
+        'sections': ['alertasdeltiempo '], # ['weather'],
         'flags': ["weather_alert"],
         'source_app': 'editorial'
     }
