@@ -1,0 +1,90 @@
+{
+  "@context": [
+    "https://geojson.org/geojson-ld/geojson-context.jsonld",
+    {
+      "@version": "1.1",
+      "wx": "https://api.weather.gov/ontology#",
+      "@vocab": "https://api.weather.gov/ontology#"
+    }
+  ],
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.2cee79836b2cb75e2581f080f26190760e725fe5.001.1",
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-66.24, 18.18],
+            [-66.2099999, 18.169999999999998],
+            [-66.17, 18.22],
+            [-66.15, 18.23],
+            [-66.14, 18.2],
+            [-66.1, 18.22],
+            [-66.05999999999999, 18.299999999999997],
+            [-66.03999999999999, 18.31],
+            [-65.97, 18.31],
+            [-65.92, 18.27],
+            [-65.95, 18.25],
+            [-65.94, 18.23],
+            [-66, 18.21],
+            [-66.04, 18.12],
+            [-66.13000000000001, 18.1],
+            [-66.13000000000001, 18.040000000000003],
+            [-66.2, 18.050000000000004],
+            [-66.23, 18.100000000000005],
+            [-66.22, 18.150000000000006],
+            [-66.24, 18.18]
+          ]
+        ]
+      },
+      "properties": {
+        "@id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.2cee79836b2cb75e2581f080f26190760e725fe5.001.1",
+        "@type": "wx:Alert",
+        "id": "urn:oid:2.49.0.1.840.0.2cee79836b2cb75e2581f080f26190760e725fe5.001.1",
+        "areaDesc": "Caguas, PR; Cayey, PR; Cidra, PR; Gurabo, PR",
+        "geocode": {
+          "SAME": ["072025", "072035", "072041", "072063"],
+          "UGC": ["PRC025", "PRC035", "PRC041", "PRC063"]
+        },
+        "affectedZones": [
+          "https://api.weather.gov/zones/county/PRC025",
+          "https://api.weather.gov/zones/county/PRC035",
+          "https://api.weather.gov/zones/county/PRC041",
+          "https://api.weather.gov/zones/county/PRC063"
+        ],
+        "references": [],
+        "sent": "2024-02-06T14:06:00-04:00",
+        "effective": "2024-02-06T14:06:00-04:00",
+        "onset": "2024-02-06T14:06:00-04:00",
+        "expires": "2024-02-06T17:00:00-04:00",
+        "ends": "2024-02-06T17:00:00-04:00",
+        "status": "Actual",
+        "messageType": "Alert",
+        "category": "Met",
+        "severity": "Severe",
+        "certainty": "Likely",
+        "urgency": "Immediate",
+        "event": "Flash Flood Warning",
+        "sender": "w-nws.webmaster@noaa.gov",
+        "senderName": "NWS San Juan PR",
+        "headline": "Flash Flood Warning issued February 6 at 2:06PM AST until February 6 at 5:00PM AST by NWS San Juan PR",
+        "description": "FFWSJU\n\nThe National Weather Service in San Juan has issued a\n\n* Flash Flood Warning for Caguas...Cayey...Cidra and Gurabo...\n\n* Until 500 PM AST.\n\n* At 206 PM AST, Doppler radar indicated thunderstorms producing\nheavy rain across the warned area. Between 1 and 4 inches of rain\nhave fallen. Additional rainfall amounts of 1 to 2 inches are\npossible in the warned area. Flash flooding is ongoing or expected\nto begin shortly.\n\nHAZARD...Flash flooding caused by thunderstorms.\n\nSOURCE...Radar.\n\nIMPACT...Flash flooding of small creeks and streams, urban\nareas, highways, streets and underpasses as well as\nother poor drainage and low-lying areas.\n\n* Some locations that will experience flash flooding include...\nCidra, Caguas, Cayey, Gurabo, Bairoa, Celada, G. L. Garcia,\nParcelas Nuevas, Parcelas La Milagrosa and Parcelas La Milagr.",
+        "instruction": "Turn around, don't drown when encountering flooded roads. Most flood\ndeaths occur in vehicles.\n\nBe aware of your surroundings and do not drive on flooded roads.\n\nPlease report observed flooding to local emergency services or law\nenforcement and request they pass this information to the National\nWeather Service when you can do so safely.",
+        "response": "Avoid",
+        "parameters": {
+          "AWIPSidentifier": ["FFWSJU"],
+          "WMOidentifier": ["WGCA52 TJSJ 061806"],
+          "flashFloodDetection": ["RADAR INDICATED"],
+          "BLOCKCHANNEL": ["EAS", "NWEM", "CMAS"],
+          "EAS-ORG": ["WXR"],
+          "VTEC": ["/O.NEW.TJSJ.FF.W.0002.240206T1806Z-240206T2100Z/"],
+          "eventEndingTime": ["2024-02-06T21:00:00+00:00"]
+        }
+      }
+    }
+  ],
+  "title": "Current watches, warnings, and advisories for Puerto Rico",
+  "updated": "2024-02-06T20:32:50+00:00"
+}
