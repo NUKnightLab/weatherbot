@@ -89,7 +89,7 @@ def post_story(headline, content, image_code=None, actually_post_articles=False)
         if resp.ok:
             resp_json = resp.json()
             internal_id = resp_json['internalid']
-            logger.info(f"posted story {internal_id}")
+            logger.info(f"posted story [{headline}] [{internal_id}]")
             return internal_id
         else:
             logger.warning(f"Failed to post [{headline}] response code [{resp.status_code}]")

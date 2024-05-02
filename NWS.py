@@ -4,6 +4,7 @@ from jinja2 import Template, Environment, FileSystemLoader
 from datetime import datetime
 import requests
 from bs4 import BeautifulSoup
+import re
 
 import logging
 logger = logging.getLogger('NWS')
@@ -106,35 +107,10 @@ def get_weather_bulletin(bulletin, test_mode) -> list:
             description = feature['properties']['description']
             #print('Headline:', headline)
             eventdict['description'] = translate(description)
-            #print(description)
-            lines = description.split("\n\n")
-            #line starting with * WHAT
-            for line in lines:
-                if line.startswith("* WHAT"):
-                    
-                    eventdict['what'] = translate(line.split("...")[1])
-                    
 
-                    # print("what", eventdict['what'])
-                elif line.startswith("* WHERE"):
-                    eventdict['where'] = translate(line.split("...")[1])
-                    # print("where", eventdict['where'])
-                elif line.startswith("* WHEN"):
-                    eventdict['when'] = translate(line.split("...")[1])
-                    # print("when", eventdict['when'])
-                elif line.startswith("* IMPACTS"):
-                    eventdict['impacts'] = translate(line.split("...")[1])
-                    # print("impacts", eventdict['impacts'])
-                elif line.startswith("* RAIN") :
-                    eventdict['rain'] = translate(line.split("...")[1])
-                    # print("rain", eventdict['rain'])
-                elif line.startswith("* WIND") :
-                    eventdict['wind'] = translate(line.split("...")[1])
-                    # print("wind", eventdict['wind'])
-                elif line.startswith("* STORM SURGE") :
-                    eventdict['storm_surge'] = translate(line.split("...")[1])
-                    # print("storm_surge", eventdict['storm_surge'])
-          
+            description_dict = process_description(description, translate)
+            eventdict.update(description_dict)
+
             data.append(eventdict)
 
         if type(parsed_ids) == dict and not test_mode:
@@ -144,6 +120,23 @@ def get_weather_bulletin(bulletin, test_mode) -> list:
 
     return data
 
+DESCRIPTION_EXTRACTORS = [
+        (re.compile("^\* WHAT"), 'what', lambda line: line.split("...")[1]),
+        (re.compile("^\* WHERE"), 'where', lambda line: line.split("...")[1]),
+        (re.compile("^\* WHEN"), 'when', lambda line: line.split("...")[1]),
+        (re.compile("^\* IMPACTS"), 'impacts', lambda line: line.split("...")[1]),
+        (re.compile("^\* RAIN"), 'rain', lambda line: line.split("...")[1]),
+        (re.compile("^\* WIND"), 'wind', lambda line: line.split("...")[1]),
+        (re.compile("^\* STORM SURGE"), 'storm_surge', lambda line: line.split("...")[1]),
+]
+def process_description(description: str, translate: callable) -> dict:
+    d = dict()
+    lines = description.split("\n\n")
+    for line in lines:
+        for pat, key, func in DESCRIPTION_EXTRACTORS:
+            if pat.match(line):
+                d[key] = translate(func(line))
+    return d
 
 def format_list_strings(strings):
     if len(strings) == 0:
