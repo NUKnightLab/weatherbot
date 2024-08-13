@@ -46,7 +46,8 @@ def send_email(recipients, subject, body , url=None, actually_send_email=False):
         msg['Subject'] = subject
         if url:
             body = body + "\n\n" + "el articulo se puede encontrar en " + url
-        msg.set_content(body)
+        msg.set_content("This is a fallback plain text message")
+        msg.add_alternative(body, subtype='html')
 
         if actually_send_email:
             logger.info(f"send_email [{subject}] to [{recipients}]")
