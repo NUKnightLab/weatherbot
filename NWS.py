@@ -112,11 +112,12 @@ def get_weather_bulletin(bulletin, test_mode) -> list:
             eventdict.update(description_dict)
 
             data.append(eventdict)
+            logger.info(f"Added [{event}] [{eventid}] to data")
 
         if type(parsed_ids) == dict and not test_mode:
             save_parsed_data(parsed_ids, PARSED_ID_FILE)
         else:
-            logger.warning(f"save_parsed_ids got non-dict, so not saving {parsed_ids}")
+            logger.warning(f"save_parsed_data got non-dict (or test mode), so not saving {parsed_ids}")
 
     return data
 
@@ -163,7 +164,8 @@ def generate_nws_stories(bulletin, test_mode=False) :
         generated_stories.append({
             "content" : new_story, 
             "headline": event["headline"],
-            'image_code': event.get('image_code')
+            'image_code': event.get('image_code'),
+            'event_id': event.get('@id', 'event ID missing')
             })
 
     return generated_stories
