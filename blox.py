@@ -47,7 +47,7 @@ def post_story(headline, content, image_code=None, actually_post_articles=False)
         
 
     now = datetime.now()
-    start_time = now + timedelta(days=365*100) # during testing, use a date far in the future because stories go live when this date is now or past
+    start_time = now # + timedelta(days=365*100) # during testing, use a date far in the future because stories go live when this date is now or past
 
     data = {
         'id': f'knightlab-bot-{now.isoformat()}',
