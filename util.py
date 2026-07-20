@@ -14,8 +14,9 @@ from datetime import datetime, timedelta
 import logging
 logger = logging.getLogger('util')
 
-SMTP_SERVER = "email-smtp.us-east-2.amazonaws.com"
-SENDER_EMAIL = 'Weatherbot <knightlab@northwestern.edu>'
+SMTP_SERVER = os.environ.get('SMTP_SERVER', 'email-smtp.us-east-2.amazonaws.com')
+SMTP_PORT = int(os.environ.get('SMTP_PORT', 587))
+SENDER_EMAIL = os.environ.get('SENDER_EMAIL', 'Weatherbot <knightlab@northwestern.edu>')
 
 JINJA_ENVIRONMENT = Environment(
     loader=FileSystemLoader('templates'),
@@ -42,7 +43,7 @@ def send_email(recipients, subject, body , url=None, actually_send_email=False):
     if recipients is not None:
         msg = EmailMessage()
         msg['From'] = SENDER_EMAIL
-        msg['To'] = recipients
+        msg['To'] = ", ".join(recipients)
         msg['Subject'] = subject
         if url:
             body = body + "\n\n" + "el articulo se puede encontrar en " + url
@@ -51,7 +52,7 @@ def send_email(recipients, subject, body , url=None, actually_send_email=False):
 
         if actually_send_email:
             logger.info(f"send_email [{subject}] to [{recipients}]")
-            with SMTP(SMTP_SERVER) as smtp:
+            with SMTP(SMTP_SERVER, SMTP_PORT) as smtp:
                 smtp.starttls()
                 smtp.login(SMTP_USERNAME, SMTP_PASSWORD)
                 smtp.send_message(msg)

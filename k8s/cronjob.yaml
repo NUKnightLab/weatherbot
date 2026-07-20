@@ -1,0 +1,22 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: weatherbot-cronjob
+spec:
+  schedule: "*/5 * * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      template:
+        spec:
+          containers:
+            - name: weatherbot
+              image: myuniqueacrname.azurecr.io/weatherbot:latest
+              command: ["python", "main.py", "--email", "--post"]
+              envFrom:
+                - secretRef:
+                    name: weatherbot-secrets
+          restartPolicy: OnFailure
