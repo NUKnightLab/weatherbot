@@ -1,11 +1,18 @@
+import logging
 import re
-from bs4 import BeautifulSoup
 
-from util import Translator,load_parsed_data, render_template, save_parsed_data,contains_area, convert_time
+from bs4 import BeautifulSoup
 from jinja2 import Template
 
+from util import (
+    Translator,
+    contains_area,
+    convert_time,
+    load_parsed_data,
+    render_template,
+    save_parsed_data,
+)
 
-import logging
 logger = logging.getLogger('NHC')
 
 def clean_str(str):
@@ -210,11 +217,10 @@ def get_tropical_bulletin(bulletin, test_mode):
                             location_amount["height"] = translate(height)
                         count += 1
                         rainlist.append(location_amount)
-            if count == 0:
-                if contains_area(sentences[0], area):
-                    hazardflags["rain"] = True
-                    hazardflags["rainfacts"] = True
-                    rainlist= translate(sentences[0].replace("\n", "").strip())
+            if count == 0 and contains_area(sentences[0], area):
+                hazardflags["rain"] = True
+                hazardflags["rainfacts"] = True
+                rainlist= translate(sentences[0].replace("\n", "").strip())
             data["rain"] = rainlist
                     
             
@@ -354,61 +360,5 @@ def writeNHC(bulletin, test_mode=False) -> dict:
             "action":"email"
         }
 
-                    
-    logger.warning(f"writeNHC finished with no clear return value")
+    logger.warning("writeNHC finished with no clear return value")
     return {}
-                        
-
-    
-
-    
-    
-   
-   
-
-                    
-            
-
-
-
-
-
-             
-             
-             
-
-             
-            
-             
-             
-         
-      
-
-    
-if __name__ == '__main__':
-    #description = "<![CDATA[ <pre> 000 WTPZ31 KNHC 290231 TCPEP1 BULLETIN Hurricane Adrian Advisory Number 6 NWS National Hurricane Center Miami FL EP012023 900 PM MDT Wed Jun 28 2023 ...ADRIAN CONTINUES MOVING SLOWLY WESTWARD... SUMMARY OF 900 PM MDT...0300 UTC...INFORMATION ---------------------------------------------- LOCATION...15.4N 109.0W ABOUT 395 MI...640 KM SW OF MANZANILLO MEXICO MAXIMUM SUSTAINED WINDS...80 MPH...130 KM/H PRESENT MOVEMENT...W OR 280 DEGREES AT 6 MPH...9 KM/H MINIMUM CENTRAL PRESSURE...986 MB...29.12 INCHES WATCHES AND WARNINGS -------------------- CHANGES WITH THIS ADVISORY: None. There are no coastal watches or warnings in effect. DISCUSSION AND OUTLOOK ---------------------- At 900 PM MDT (0300 UTC), the center of Hurricane Adrian was located near latitude 15.4 North, longitude 109.0 West. Adrian is moving toward the west near 6 mph (9 km/h). A slow motion toward the west or west-northwest is expected during the next few days. Maximum sustained winds are near 80 mph (130 km/h) with higher gusts. Some additional strengthening is forecast into Thursday. Weakening is likely to begin Thursday night or Friday. Hurricane-force winds extend outward up to 15 miles (30 km) from the center and tropical-storm-force winds extend outward up to 80 miles (130 km). The estimated minimum central pressure is 986 mb (29.12 inches). HAZARDS AFFECTING LAND ---------------------- None NEXT ADVISORY ------------- Next complete advisory at 300 AM MDT. $$ Forecaster Pasch </pre> ]]>"
-    #get from dir the latest xml filclee
-   
-        # print(bulletin)
-        #[no_warning , no_update , practive , raintranslate ,surgetranslate , interest]
-        
-
-        # print(data)
-
-    #print(data['location'])
-    print("test")
-
-    testdata= writeNHC("test.xml")
-
-    print(testdata)
-       
-
-
-    
-
- 
-  
-    
-    
-   
-    

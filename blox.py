@@ -1,10 +1,11 @@
 import json
+import logging
 import os
-import requests
-from datetime import datetime, timedelta
+from datetime import UTC, datetime
 from pathlib import Path
 
-import logging
+import requests
+
 logger = logging.getLogger('blox')
 
 AUTH_OK = False
@@ -13,7 +14,7 @@ try:
     AUTH_SECRET = os.environ['AUTH_SECRET']
     AUTH_OK = True
 except KeyError:
-    logger.warn("CMS API configuration error. AUTH_USER and AUTH_SECRET must be set as environment variables. Articles will not be posted.")
+    logger.warning("CMS API configuration error. AUTH_USER and AUTH_SECRET must be set as environment variables. Articles will not be posted.")
 
 WS_ROOT = 'https://www.elvocero.com/tncms/webservice/v1/'
 
@@ -46,7 +47,7 @@ def post_story(headline, content, image_code=None, actually_post_articles=False)
 
         
 
-    now = datetime.now()
+    now = datetime.now(UTC)
     start_time = now # + timedelta(days=365*100) # during testing, use a date far in the future because stories go live when this date is now or past
 
     data = {
@@ -116,7 +117,7 @@ def post_image(image_code):
     img_path = get_image(image_code)
 
     url = f"{WS_ROOT}editorial/create_asset"
-    now = datetime.now()
+    now = datetime.now(UTC)
     data = {
         'id': f'knightlab-bot-image-{image_code}-{now.isoformat()}',
         'type': 'image',
@@ -146,7 +147,7 @@ def post_test_story():
 <p>Laboris nulla nisi ut adipisicing aliqua Lorem ea ea quis pariatur sint. Mollit sit nulla nisi amet aliquip voluptate. Magna qui minim Lorem enim eu commodo consectetur fugiat id. Quis do duis officia commodo do ullamco exercitation excepteur consequat do nisi.</p>
 <p>Laborum ea laborum esse excepteur labore aliquip deserunt nostrud sunt eu. Incididunt enim in id culpa voluptate dolore fugiat laborum. Elit tempor qui velit aute. Laborum aute est anim nisi id pariatur aliquip officia id enim est.</p>
 """
-    now = datetime.now()
+    now = datetime.now(UTC)
     response = post_story(f"{now.isoformat()} Test story", content, 'aviso_de_huracan')
     return response 
 
@@ -187,8 +188,9 @@ def search(q='Knight Lab'):
             if data['offset'] + data['limit'] > data['total']: break
             query['o'] = query['o'] + data['limit']
     except Exception as e:
-        import pdb; pdb.set_trace()
-    return items        
+        logger.error(f"Error searching for [{q}]: {e}")
+        logger.exception()
+    return items
 
 def get(id):
     url = f"{WS_ROOT}editorial/get"

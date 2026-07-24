@@ -35,7 +35,7 @@ def send_email(recipients, subject, body , url=None, actually_send_email=False):
         SMTP_PASSWORD = os.environ['SMTP_PASSWORD']
     except KeyError:
         if actually_send_email:
-            logger.warn("Email configuration error: SMTP_USERNAME and SMTP_PASSWORD must be set as environment variables. Email will not be sent.")
+            logger.warning("Email configuration error: SMTP_USERNAME and SMTP_PASSWORD must be set as environment variables. Email will not be sent.")
         actually_send_email = False        
 
 
@@ -82,8 +82,8 @@ def load_parsed_data(filepath: str) -> dict:
             with open(filepath, "r") as file:
                 parsed_data = json.load(file)
             if type(parsed_data) != dict: # typing should maybe make this irrelevant?
-                logger.warning(f"Loaded {filepath} but got a non-dict {parsed_ids}")
-                parsed_ids = {}
+                logger.warning(f"Loaded {filepath} but got a non-dict {parsed_data}")
+                parsed_data = {}
 
         except json.JSONDecodeError:
             # Handle JSONDecodeError (invalid JSON file)
@@ -155,7 +155,7 @@ def walk_notices(root_dir_path):
 
 
  
-HEADLINE_PAT = re.compile('^\.\.\.(.+)\.\.\.$')
+HEADLINE_PAT = re.compile(r'^\.\.\.(.+)\.\.\.$')
 def get_headlines(txt_lines):
     """Given a pre-split array of lines from a notice,
        return an array of the "headlines" found within.

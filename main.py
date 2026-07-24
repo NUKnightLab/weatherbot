@@ -7,23 +7,23 @@
 # data and posted to El Vocero's CMS.
 # If a story is posted, an email is also sent to notify interested parties.
 #
-# TODO: all time shuld be UTC-4 -- not AST
+# TODO: all time should be UTC-4 -- not AST
 #       take that out of headlines especially
 # TODO: get glossary
 
-import requests
 import datetime
-from io import StringIO
-import os
 import json
-
-from NWS import  fetch_nws_data, generate_nws_stories
-from NHC import writeNHC
-from blox import make_cms_link, post_story
-from util import send_email, initialize_directory
-
 import logging
+import os
+from io import StringIO
 from logging.handlers import RotatingFileHandler
+
+import requests
+
+from blox import make_cms_link, post_story
+from NHC import writeNHC
+from NWS import fetch_nws_data, generate_nws_stories
+from util import initialize_directory, send_email
 
 logger = logging.getLogger()
 
@@ -65,12 +65,15 @@ def main_nws(testfile=None, actually_post_articles=False):
     else:
         nws_json = fetch_nws_data()
 
-    if nws_json:
-        textid= datetime.datetime.now().strftime("%Y%m%d%H%M%S")
-        filelocation=os.path.join(nwsjson_directory,f"{textid}.json")
-        with open(filelocation,"w") as file:
-            json.dump(nws_json, file)
-            logger.debug(f"saved {filelocation}")
+    if not nws_json:
+        logger.warning("No NWS data available, skipping story generation")
+        return
+
+    textid= datetime.datetime.now(datetime.UTC).strftime("%Y%m%d%H%M%S")
+    filelocation=os.path.join(nwsjson_directory,f"{textid}.json")
+    with open(filelocation,"w") as file:
+        json.dump(nws_json, file)
+        logger.debug(f"saved {filelocation}")
 
     # TODO: pass JSON instead of file
     generated = generate_nws_stories(filelocation, test_mode=test_mode)
@@ -118,14 +121,14 @@ def main_nhc(testfile=None, actually_send_email=False, actually_post_articles=Fa
             logger.error(f"Error processing bulletin {testfile} {e}")
         except Exception as e:
             logger.error(f"Error processing bulletin {testfile} {e}")
-            logger.exception(e)
+            logger.exception()
     else:
         for url in nhc_urls:
             try:
                 wallet = url.split("xml/")[1].split(".xml")[0]
                 response = requests.get(url)
                 if response.status_code == 200:
-                    textid = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+                    textid = datetime.datetime.now(datetime.UTC).strftime("%Y%m%d%H%M%S")
                     response.encoding = 'utf-8'
                     
                     filelocation = os.path.join(tcpat_directory, f"{wallet}_{textid}.xml")
@@ -145,7 +148,7 @@ def main_nhc(testfile=None, actually_send_email=False, actually_post_articles=Fa
             #     logger.error(f"Error processing bulletin {url} {e}")
             except Exception as e:
                 logger.error(f"Error processing bulletin {url} {e}")
-                logger.exception(e)
+                logger.exception()
 
     if results:
         for parsed in results:
@@ -166,7 +169,7 @@ def main_nhc(testfile=None, actually_send_email=False, actually_post_articles=Fa
 def main(test_mode=False, actually_send_email=False, actually_post_articles=False, nws_testfile=None, nhc_testfile=None):
     configure_logging(logger)
 
-    runtime_marker = datetime.datetime.now().strftime('%Y-%m-%d_%H:%M')
+    runtime_marker = datetime.datetime.now(datetime.UTC).strftime('%Y-%m-%d_%H:%M')
     logger.info(f"------- Weatherbot begin {runtime_marker}")
 
     if not actually_post_articles:
@@ -192,13 +195,13 @@ def main(test_mode=False, actually_send_email=False, actually_post_articles=Fals
             main_nws(actually_post_articles=actually_post_articles)
         except Exception as e:
             logger.error(f"Uncaught exception in main_nws: {e}")
-            logger.exception(e)
+            logger.exception()
 
         try:
             main_nhc(actually_send_email=actually_send_email, actually_post_articles=actually_post_articles)
         except Exception as e:
             logger.error(f"Uncaught exception in main_nhc: {e}")
-            logger.exception(e)
+            logger.exception()
 
     logger.info(f"------- Weatherbot complete {runtime_marker}")
 

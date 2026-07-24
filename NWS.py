@@ -1,12 +1,18 @@
-import json 
-from util import load_parsed_data, render_template, save_parsed_data, contains_area, Translator,convert_time, headline_to_gmt_minus_4
-from jinja2 import Template, Environment, FileSystemLoader
-from datetime import datetime
-import requests
-from bs4 import BeautifulSoup
+import json
+import logging
 import re
 
-import logging
+import requests
+
+from util import (
+    Translator,
+    convert_time,
+    headline_to_gmt_minus_4,
+    load_parsed_data,
+    render_template,
+    save_parsed_data,
+)
+
 logger = logging.getLogger('NWS')
 
 
@@ -35,7 +41,6 @@ def get_weather_bulletin(bulletin, test_mode) -> list:
     translate = Translator()
 
     data = []
-    areas = ["puerto rico", "vieques","culebra" , "pr"]
 
     relevant_stories= { # if there's an image that should be posted for a given story type, include the code here.
         'flash flood warning': 'aviso_de_inundaciones',
@@ -87,13 +92,8 @@ def get_weather_bulletin(bulletin, test_mode) -> list:
             #print(refs)
             
             areas = feature['properties']['areaDesc'].split(";")
-            
-            for i in range(len(areas)):
-                if contains_area(areas[i], areas):
-                    areas[i]=translate(areas[i].split(",")[0].strip())
-                else :
-                    areas.pop(i)
-                 
+            areas = [translate(area.split(",")[0].strip()) for area in areas]
+
             eventdict['areas_affected'] = format_list_strings(areas)
             if len(areas) == 1:
                 eventdict['onearea'] = True
@@ -128,16 +128,16 @@ def get_weather_bulletin(bulletin, test_mode) -> list:
     return data
 
 DESCRIPTION_EXTRACTORS = [
-        (re.compile("^\* WHAT"), 'what', lambda line: line.split("...")[1]),
-        (re.compile("^\* WHERE"), 'where', lambda line: line.split("...")[1]),
-        (re.compile("^\* WHEN"), 'when', lambda line: line.split("...")[1]),
-        (re.compile("^\* IMPACTS"), 'impacts', lambda line: line.split("...")[1]),
-        (re.compile("^\* RAIN"), 'rain', lambda line: line.split("...")[1]),
-        (re.compile("^\* WIND"), 'wind', lambda line: line.split("...")[1]),
-        (re.compile("^\* STORM SURGE"), 'storm_surge', lambda line: line.split("...")[1]),
+        (re.compile(r"^\* WHAT"), 'what', lambda line: line.split("...")[1]),
+        (re.compile(r"^\* WHERE"), 'where', lambda line: line.split("...")[1]),
+        (re.compile(r"^\* WHEN"), 'when', lambda line: line.split("...")[1]),
+        (re.compile(r"^\* IMPACTS"), 'impacts', lambda line: line.split("...")[1]),
+        (re.compile(r"^\* RAIN"), 'rain', lambda line: line.split("...")[1]),
+        (re.compile(r"^\* WIND"), 'wind', lambda line: line.split("...")[1]),
+        (re.compile(r"^\* STORM SURGE"), 'storm_surge', lambda line: line.split("...")[1]),
 ]
 def process_description(description: str, translate: callable) -> dict:
-    d = dict()
+    d = {}
     lines = description.split("\n\n")
     for line in lines:
         for pat, key, func in DESCRIPTION_EXTRACTORS:
@@ -175,56 +175,3 @@ def generate_nws_stories(bulletin, test_mode=False) :
             })
 
     return generated_stories
-
-# TODO consider a dict of linestart pattern keys/eventdict key values instead of long if/else
-def test0 ():
-    desc="The National Weather Service in Las Vegas has extended the\n\n* Flash Flood Warning for...\nNorthwestern Clark County in southern Nevada...\n\n* Until 1230 PM PDT.\n\n* At 923 AM PDT, Excessive runoff in creeks and washes from the\nearlier heavy rain fall continues around Mount Charleston. Flash\nflooding is ongoing.\n\nHAZARD...Life-threatening flash flooding. Heavy rain producing\nflash flooding.\n\nSOURCE...Video and gauges reports.\n\nIMPACT...Life-threatening flash flooding of low-water\ncrossings, creeks, normally dry washes and roads.\n\n* Some locations that will experience flash flooding include...\nRainbow Canyon, Mt. Charleston, Spring Mountains, Hilltop\nCampground, Mahogany Grove Campground, Kyle Canyon Campground,\nFletcher View Campground, Mary Jane Falls Campground, Dolomite\nCampground and Mcwilliams Campground.\n\nPlease stay away from Mount Charleston as signficant flooding and\nflood damage has occurred."
-    description= "RRA\n\n* WHAT...Small stream flooding caused by excessive runoff.\n\n* WHERE...Patillas.\n\n* WHEN...Until 315 PM AST.\n\n* IMPACTS...Rises in small streams and rivers, particularly Rio\nPatillas and its tributaries.\n\n* ADDITIONAL DETAILS...\n- At 129 PM AST, Excessive runoff will continue to cause small\nstream flooding and sharp rises along rivers.\n- http://www.weather.gov/safety/flood"
-    eventdict = {}
-    lines = desc.split("\n\n")
-    eventdict["event"]="ffw"
-            #line starting with * WHAT
-    for line in lines:
-        if line.startswith("* WHAT"):
-            
-            eventdict['what'] = translate(line.split("...")[1])
-            
-
-            # print("what", eventdict['what'])
-        elif line.startswith("* WHERE"):
-            eventdict['where'] = translate(line.split("...")[1])
-            # print("where", eventdict['where'])
-        elif line.startswith("* WHEN"):
-            eventdict['when'] = translate(line.split("...")[1])
-            # print("when", eventdict['when'])
-        elif line.startswith("HAZARD"):
-            eventdict['hazard'] = translate(line.split("...")[1])
-            # print("when", eventdict['when'])
-        elif line.startswith("* IMPACTS") or line.startswith("IMPACT") :
-            eventdict['impacts'] = translate(line.split("...")[1])
-            # print("impacts", eventdict['impacts'])
-        elif line.startswith("* RAIN") :
-            eventdict['rain'] = translate(line.split("...")[1])
-            # print("rain", eventdict['rain'])
-        elif line.startswith("* WIND") :
-            eventdict['wind'] = translate(line.split("...")[1])
-            # print("wind", eventdict['wind'])
-        elif line.startswith("* STORM SURGE") :
-            eventdict['storm_surge'] = translate(line.split("...")[1])
-            # print("storm_surge", eventdict['storm_surge'])
-
-    print( "what" not in eventdict.keys() and "hazard" in eventdict.keys() and "impacts" in eventdict.keys())
-    template=" <p> {{data.what}} </p> <p> {{data.hazard}} </p> <p> {{data.impacts}} </p> "
-    template = Template(template)
-    rendered = template.render(data=eventdict)
-    soup = BeautifulSoup(rendered, 'html.parser')
-    p_tags= soup.find_all('p')
-    text='\n'.join([ elem.get_text() for elem in p_tags])
-    print(text)
-
-    
-
-
-if __name__ == '__main__':
-    
-    test0()

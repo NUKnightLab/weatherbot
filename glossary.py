@@ -2,21 +2,17 @@
 # https://github.com/DeepLcom/deepl-python#command-line-interface
 # but this has fewer flags and options than theirs.
 # https://github.com/DeepLcom/deepl-python#glossaries
-import deepl
-import os
-import click
 import json
+import os
+
+import click
+import deepl
 
 TRANSLATOR = deepl.Translator(os.environ['DEEPL_AUTH_KEY'])
 
 @click.group()
 def cli():
     pass
-
-@cli.command()
-@click.argument('input', type=click.File('rb'))
-def translate():
-
 
 @cli.command()
 def list():

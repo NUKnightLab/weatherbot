@@ -163,6 +163,15 @@ Example test commands:
   python main.py --nhc test_files/nhc_franklin_tropical_storm_watch.xml
   ```
 
+#### Automated tests
+There is also a `pytest` suite in the `tests` directory, which exercises the NWS/NHC parsing and story-generation logic against the fixtures in `test_files` and checks a few `util.py` helpers directly. These tests run offline: a `conftest.py` at the repo root clears `DEEPL_AUTH_KEY`/`AUTH_USER`/`SMTP_*` from the environment before each test, so they never call DeepL, the CMS, or SMTP, and never send email or post articles, regardless of what's set in your shell (e.g. via `.envrc`).
+
+To run them:
+  ```sh
+  pip install pytest
+  pytest
+  ```
+
 
 
 
