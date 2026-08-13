@@ -62,7 +62,7 @@ def get_tropical_bulletin(bulletin, test_mode):
     for item in items :
         
         desc = item.find('description')
-        desc = desc.text.replace('<br />','')
+        desc = desc.text.replace('<br />','\n')
         headers = desc.split("BULLETIN")[1].split("SUMMARY OF")[0]
         headers = headers.strip().split("\n")
         headers = [line for line in headers if line != '']
